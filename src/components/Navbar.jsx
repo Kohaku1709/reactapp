@@ -1,12 +1,19 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate("/");
+  };
+
   return (
     <header className="header">
       <div className="header-inner">
         <NavLink to="/" className="logo">
           <span className="logo-icon">✦</span>
-          <span className="logo-text">StayVN</span>
+          <span className="logo-text">StayHTM</span>
         </NavLink>
         <nav className="nav">
           <NavLink
@@ -36,8 +43,21 @@ export default function Navbar() {
           </NavLink>
         </nav>
         <div className="header-actions">
-          <button className="header-btn">Hỗ trợ</button>
-          <button className="header-btn outlined">Đăng nhập</button>
+          <Link to="/contact" className="header-btn">
+            Hỗ trợ
+          </Link>
+          {currentUser ? (
+            <>
+              <span className="header-user">Xin chào, {currentUser.name}</span>
+              <button type="button" className="header-btn outlined" onClick={handleLogout}>
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="header-btn outlined">
+              Đăng nhập
+            </Link>
+          )}
         </div>
       </div>
     </header>

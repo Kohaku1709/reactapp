@@ -32,8 +32,13 @@
   --heading: 'Quicksand', sans-serif;
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
+
 html {
   scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 body {
@@ -42,6 +47,7 @@ body {
   background: var(--surface);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -ms-overflow-style: none;
 }
 
 a {
@@ -143,6 +149,13 @@ a {
 .header-btn.outlined:hover {
   background: var(--brand);
   color: white;
+}
+
+.header-user {
+  font-size: 13px;
+  color: var(--muted);
+  align-self: center;
+  white-space: nowrap;
 }
 
 /* ===== HERO (trang chủ) ===== */
@@ -470,7 +483,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 6px;
 }
 
 .section-title {
@@ -573,6 +586,7 @@ a {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
 .filter-btn {
@@ -641,11 +655,7 @@ a {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s;
   border: 1px solid var(--border);
-}
-
-.hotel-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
+  will-change: transform;
 }
 
 .hotel-img-wrap {
@@ -661,8 +671,15 @@ a {
   transition: transform 0.5s ease;
 }
 
-.hotel-card:hover .hotel-img {
-  transform: scale(1.06);
+@media (hover: hover) and (pointer: fine) {
+  .hotel-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hotel-card:hover .hotel-img {
+    transform: scale(1.06);
+  }
 }
 
 .hotel-badge {
@@ -682,7 +699,7 @@ a {
 .hotel-discount {
   position: absolute;
   top: 12px;
-  right: 44px;
+  right: 52px;
   background: var(--danger);
   color: white;
   padding: 4px 10px;
@@ -699,7 +716,7 @@ a {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.9);
+  background: #00000050;
   backdrop-filter: blur(4px);
   font-size: 16px;
   cursor: pointer;
@@ -707,13 +724,27 @@ a {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  z-index: 2;
 }
 
 .wishlist-btn:hover {
-  background: white;
-  transform: scale(1.1);
+  transform: scale(1.12);
   color: var(--danger);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
+
+.wishlist-btn:focus {
+  outline: none;
+}
+
+.wishlist-btn:focus-visible {
+  transform: scale(1.12);
+  color: var(--danger);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+}
+
 
 .hotel-info {
   padding: 18px 20px 20px;
@@ -876,8 +907,6 @@ a {
   align-items: center;
 }
 
-.about-text {}
-
 .about-para {
   color: var(--muted);
   font-size: 16px;
@@ -904,8 +933,6 @@ a {
   gap: 32px;
   text-align: center;
 }
-
-.stat-card {}
 
 .stat-number {
   font-family: var(--font-head);
@@ -1030,22 +1057,30 @@ a {
 
 .contact-cards {
   display: flex;
+  align-items: center;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
   margin-bottom: 32px;
 }
 
 .contact-card {
   display: flex;
+  flex-direction: row;
+  width: 100%;
   align-items: center;
-  gap: 16px;
   padding: 16px 20px;
   background: var(--surface);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
 
+.contact-card :nth-child(2) {
+  flex: 16;
+}
+
 .contact-card-icon {
+  flex: 1;
   font-size: 24px;
   flex-shrink: 0;
 }
@@ -1063,6 +1098,17 @@ a {
   font-size: 14px;
   font-weight: 500;
   color: var(--dark);
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.social-links div {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
 .social-btn {
@@ -1170,18 +1216,36 @@ a {
   font-size: 15px;
 }
 
+.login-error {
+  color: var(--danger);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.login-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 14px;
+  text-align: center;
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background: var(--dark);
   color: rgba(255, 255, 255, 0.65);
   padding: 60px 32px 0;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+  left: 0;
+  box-sizing: border-box;
 }
 
 .footer-inner {
-  max-width: 1280px;
+  /* max-width: 1280px; */
   margin: 0 auto;
   gap: 60px;
-  padding-bottom: 48px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   display: grid;
@@ -1210,7 +1274,7 @@ a {
 .footer-links {
   display: contents;
   gap: 20px;
-  
+
 }
 
 .footer-links h4 {
@@ -1235,12 +1299,17 @@ a {
 }
 
 .footer-bottom {
-  max-width: 1280px;
+  /* max-width: 1280px; */
   margin: 0 auto;
   padding: 20px 0;
   display: flex;
   justify-content: space-between;
   font-size: 13px;
+}
+
+.footer-links a:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 /* ===== RESPONSIVE ===== */
