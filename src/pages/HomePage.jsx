@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const hotels = [
   { id: 1, name: "The Grand Saigon Palace", location: "Quận 1, TP.HCM", rating: 4.9, reviews: 2341, price: 2850000, originalPrice: 3800000, image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80", tags: ["Hồ bơi vô cực", "Spa", "Nhà hàng"], badge: "Bán chạy nhất", stars: 5 },
@@ -7,7 +9,7 @@ const hotels = [
   { id: 3, name: "Lotus Heritage Resort", location: "Thủ Đức, TP.HCM", rating: 4.8, reviews: 1523, price: 3200000, originalPrice: 4100000, image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80", tags: ["Biệt thự riêng", "Hồ bơi", "Butler service"], badge: "Sang trọng", stars: 5 },
   { id: 4, name: "Cityscape Business Hotel", location: "Bình Thạnh, TP.HCM", rating: 4.5, reviews: 654, price: 980000, originalPrice: 1200000, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&q=80", tags: ["Trung tâm thành phố", "Wifi tốc độ cao", "Coworking"], badge: "Giá rẻ", stars: 4 },
   { id: 5, name: "Indochine Sky Suites", location: "Quận 3, TP.HCM", rating: 4.6, reviews: 1102, price: 1750000, originalPrice: 2300000, image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&q=80", tags: ["Tầng thượng", "Bar", "Lịch sử"], badge: "Đặc sắc", stars: 4 },
-  { id: 6, name: "Pearl Riverside Escape", location: "Quận 4, TP.HCM", rating: 4.4, reviews: 431, price: 820000, originalPrice: 1100000, image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80", tags: ["Ven sông", "Yên tĩnh", "Bếp riêng"], badge: null, stars: 3 },
+  { id: 6, name: "Pearl Riverside Escape", location: "Quận 4, TP.HCM", rating: 4.4, reviews: 421, price: 820000, originalPrice: 1100000, image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80", tags: ["Ven sông", "Yên tĩnh", "Bếp riêng"], badge: null, stars: 3 },
 ];
 
 const destinations = [
@@ -64,74 +66,77 @@ function HotelCard({ hotel }) {
   );
 }
 
-function CalendarPicker({ label, icon, value, onChange }) {
-  const [open, setOpen] = useState(false);
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const monthNames = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
-  const dayNames = ["CN","T2","T3","T4","T5","T6","T7"];
-  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const selectDate = (day) => {
-    const d = new Date(viewYear, viewMonth, day);
-    onChange(d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }));
-    setOpen(false);
-  };
-  const isSelected = (day) => {
-    if (!value) return false;
-    return new Date(viewYear, viewMonth, day).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) === value;
-  };
-  const isPast = (day) => {
-    const d = new Date(viewYear, viewMonth, day); d.setHours(0,0,0,0);
-    const t = new Date(); t.setHours(0,0,0,0);
-    return d < t;
-  };
-  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y-1); } else setViewMonth(m => m-1); };
-  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y+1); } else setViewMonth(m => m+1); };
+// function CalendarPicker({ label, icon, value, onChange }) {
+//   const [open, setOpen] = useState(false);
+//   const today = new Date();
+//   const [viewYear, setViewYear] = useState(today.getFullYear());
+//   const [viewMonth, setViewMonth] = useState(today.getMonth());
+//   const monthNames = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+//   const dayNames = ["CN","T2","T3","T4","T5","T6","T7"];
+//   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+//   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+//   const selectDate = (day) => {
+//     const d = new Date(viewYear, viewMonth, day);
+//     onChange(d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }));
+//     setOpen(false);
+//   };
+//   const isSelected = (day) => {
+//     if (!value) return false;
+//     return new Date(viewYear, viewMonth, day).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) === value;
+//   };
+//   const isPast = (day) => {
+//     const d = new Date(viewYear, viewMonth, day); d.setHours(0,0,0,0);
+//     const t = new Date(); t.setHours(0,0,0,0);
+//     return d < t;
+//   };
+//   const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y-1); } else setViewMonth(m => m-1); };
+//   const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y+1); } else setViewMonth(m => m+1); };
 
-  return (
-    <div className="calendar-picker">
-      <div className="search-field" onClick={() => setOpen(o => !o)} style={{ cursor: "pointer" }}>
-        <span className="field-icon">{icon}</span>
-        <div>
-          <label>{label}</label>
-          <div className="date-display">{value || "Chọn ngày"}</div>
-        </div>
-      </div>
-      {open && (
-        <>
-          <div className="cal-backdrop" onClick={() => setOpen(false)} />
-          <div className="calendar-dropdown">
-            <div className="cal-header">
-              <button className="cal-nav" onClick={prevMonth}>‹</button>
-              <span className="cal-month-label">{monthNames[viewMonth]} {viewYear}</span>
-              <button className="cal-nav" onClick={nextMonth}>›</button>
-            </div>
-            <div className="cal-days-row">{dayNames.map(d => <span key={d} className="cal-day-name">{d}</span>)}</div>
-            <div className="cal-grid">
-              {Array.from({ length: firstDay }).map((_, i) => <span key={`e${i}`} />)}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1;
-                return (
-                  <button key={day} className={`cal-day ${isSelected(day) ? "selected" : ""} ${isPast(day) ? "past" : ""}`}
-                    onClick={() => !isPast(day) && selectDate(day)} disabled={isPast(day)}>
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+//   return (
+//     <div className="calendar-picker">
+//       <div className="search-field" onClick={() => setOpen(o => !o)} style={{ cursor: "pointer" }}>
+//         <span className="field-icon">{icon}</span>
+//         <div>
+//           <label>{label}</label>
+//           <div className="date-display">{value || "Chọn ngày"}</div>
+//         </div>
+//       </div>
+//       {open && (
+//         <>
+//           <div className="cal-backdrop" onClick={() => setOpen(false)} />
+//           <div className="calendar-dropdown">
+//             <div className="cal-header">
+//               <button className="cal-nav" onClick={prevMonth}>‹</button>
+//               <span className="cal-month-label">{monthNames[viewMonth]} {viewYear}</span>
+//               <button className="cal-nav" onClick={nextMonth}>›</button>
+//             </div>
+//             <div className="cal-days-row">{dayNames.map(d => <span key={d} className="cal-day-name">{d}</span>)}</div>
+//             <div className="cal-grid">
+//               {Array.from({ length: firstDay }).map((_, i) => <span key={`e${i}`} />)}
+//               {Array.from({ length: daysInMonth }).map((_, i) => {
+//                 const day = i + 1;
+//                 return (
+//                   <button key={day} className={`cal-day ${isSelected(day) ? "selected" : ""} ${isPast(day) ? "past" : ""}`}
+//                     onClick={() => !isPast(day) && selectDate(day)} disabled={isPast(day)}>
+//                     {day}
+//                   </button>
+//                 );
+//               })}
+//             </div>
+//           </div>
+//         </>
+//       )}
+//     </div>
+//   );
+// }
+
+
 
 export default function HomePage() {
   const [destination, setDestination] = useState("TP. Hồ Chí Minh");
-  const [checkin, setCheckin] = useState("");
-  const [checkout, setCheckout] = useState("");
+  // Chuyển state sang kiểu Date để DatePicker hoạt động chuẩn
+  const [checkin, setCheckin] = useState(null);
+  const [checkout, setCheckout] = useState(null);
   const [guests, setGuests] = useState("2 khách, 1 phòng");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [searchDone, setSearchDone] = useState(false);
@@ -158,27 +163,32 @@ export default function HomePage() {
           <p className="hero-sub">Đặt phòng nhanh chóng, giá tốt nhất, không phí ẩn</p>
           <div className="search-box">
             <div className="search-field">
-              <span className="field-icon">📍</span>
+              <span className="field-icon">📅</span>
               <div>
-                <label>Điểm đến</label>
-                <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="Thành phố, khách sạn..." />
+                <label>Nhận phòng</label>
+                <DatePicker
+                  selected={checkin}
+                  onChange={(date) => setCheckin(date)}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Chọn ngày"
+                  minDate={new Date()}
+                />
               </div>
             </div>
+
             <div className="search-divider" />
-            <CalendarPicker label="Nhận phòng" icon="📅" value={checkin} onChange={setCheckin} />
-            <div className="search-divider" />
-            <CalendarPicker label="Trả phòng" icon="📅" value={checkout} onChange={setCheckout} />
-            <div className="search-divider" />
+
             <div className="search-field">
-              <span className="field-icon">👤</span>
+              <span className="field-icon">📅</span>
               <div>
-                <label>Khách & Phòng</label>
-                <select value={guests} onChange={e => setGuests(e.target.value)}>
-                  <option>1 khách, 1 phòng</option>
-                  <option>2 khách, 1 phòng</option>
-                  <option>2 khách, 2 phòng</option>
-                  <option>4 khách, 2 phòng</option>
-                </select>
+                <label>Trả phòng</label>
+                <DatePicker
+                  selected={checkout}
+                  onChange={(date) => setCheckout(date)}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Chọn ngày"
+                  minDate={checkin || new Date()} // Ngày trả phải sau ngày nhận
+                />
               </div>
             </div>
             <button className="search-btn" onClick={() => { setSearchDone(true); navigate("/hotels"); }}>

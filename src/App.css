@@ -282,6 +282,7 @@ a {
 
 .search-field input,
 .search-field select {
+  text-align: center;
   border: none;
   outline: none;
   font-family: var(--font-body);
