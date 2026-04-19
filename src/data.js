@@ -1,4 +1,7 @@
-// Data hotels
+// File này chỉ chứa dữ liệu mẫu cho demo.
+// Tách dữ liệu riêng giúp component gọn hơn và dễ thay dữ liệu sau này.
+
+// Danh sách khách sạn dùng cho HomePage và HotelsPage.
 export const hotels = [
   {
     id: 1,
@@ -156,7 +159,7 @@ export const destinations = [
   },
 ];
 
-// AboutPage
+// Số liệu hiển thị ở AboutPage.
 export const stats = [
   { number: "500K+", label: "Khách sạn toàn cầu" },
   { number: "2M+", label: "Khách hàng tin dùng" },
@@ -187,7 +190,7 @@ export const values = [
   },
 ];
 
-// ContactPage
+// Thông tin liên hệ hiển thị ở ContactPage.
 export const contactInfo = [
   {
     icon: "📍",

@@ -1429,3 +1429,23 @@ a {
     align-items: flex-start;
   }
 }
+
+/* ;)) */
+@media (max-width: 360px) {
+  #root {
+    display: none;
+  }
+
+  body::before {
+    content: "Test responsive thế đủ rồi bạn êyy";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+    text-align: center;
+    color: #000000;
+    font-family: 'Nunito', sans-serif;
+    background: #fefefe;
+  }
+}

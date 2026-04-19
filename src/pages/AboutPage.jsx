@@ -3,7 +3,7 @@ import { stats, values } from "../data"
 
 export default function AboutPage() {
   return (
-    <div className="app" style={{ paddingTop: "68px" }}>
+    <div className="app page-with-header-offset">
 
       {/* PAGE HERO */}
       <div className="page-hero about-hero">
@@ -15,14 +15,14 @@ export default function AboutPage() {
       </div>
 
       {/* STORY */}
-      <section className="section" style={{ background: "white" }}>
+      <section className="section section-white">
         <div className="section-inner about-story">
           <div className="about-text">
-            <h2 className="section-title" style={{ marginBottom: "20px" }}>Chúng tôi là ai?</h2>
+            <h2 className="section-title section-title-spaced">Chúng tôi là ai?</h2>
             <p className="about-para">StayHTM được thành lập năm 2026 tại TP. Hồ Chí Minh với sứ mệnh đơn giản: giúp mọi người Việt Nam tìm được chỗ nghỉ tốt với mức giá hợp lý nhất.</p>
             <p className="about-para">Xuất phát từ nỗi bức xúc của chính những người sáng lập khi phải trả phí đặt phòng cao ngất cho các nền tảng nước ngoài, chúng tôi quyết định xây dựng một giải pháp thuần Việt — hiểu văn hóa, hiểu nhu cầu, và luôn đặt người dùng lên hàng đầu.</p>
             <p className="about-para">Sau thời gian phát triển ban đầu, StayHTM hiện đang mở rộng hệ thống khách sạn và phục vụ ngày càng nhiều lượt đặt phòng mỗi năm trên toàn quốc.</p>
-            <Link to="/contact" className="book-btn" style={{ display: "inline-block", marginTop: "24px", textDecoration: "none" }}>
+            <Link to="/contact" className="book-btn about-contact-link">
               Liên hệ chúng tôi →
             </Link>
           </div>
@@ -33,9 +33,10 @@ export default function AboutPage() {
       </section>
 
       {/* STATS */}
-      <section className="section" style={{ background: "var(--brand)", padding: "60px 0" }}>
+      <section className="section section-brand-compact">
         <div className="section-inner">
           <div className="stats-grid">
+            {/* Dữ liệu tách ở data.js giúp thay số liệu mà không phải đụng layout. */}
             {stats.map((s) => (
               <div key={s.label} className="stat-card">
                 <div className="stat-number">{s.number}</div>
@@ -47,12 +48,13 @@ export default function AboutPage() {
       </section>
 
       {/* VALUES */}
-      <section className="section" style={{ background: "var(--surface)" }}>
+      <section className="section section-surface">
         <div className="section-inner">
-          <div className="section-header" style={{ justifyContent: "center", marginBottom: "48px" }}>
-            <h2 className="section-title" style={{ textAlign: "center" }}>Giá trị cốt lõi</h2>
+          <div className="section-header section-header-centered">
+            <h2 className="section-title section-title-centered">Giá trị cốt lõi</h2>
           </div>
           <div className="values-grid">
+            {/* map từ mảng values để tái sử dụng UI card và dễ mở rộng nội dung. */}
             {values.map((v) => (
               <div key={v.title} className="value-card">
                 <div className="value-icon">{v.icon}</div>
@@ -68,7 +70,7 @@ export default function AboutPage() {
       <section className="about-cta">
         <h2>Sẵn sàng khám phá Việt Nam cùng StayHTM?</h2>
         <p>Hàng ngàn khách sạn đang chờ bạn với mức giá tốt nhất</p>
-        <Link to="/" className="search-btn" style={{ display: "inline-block", textDecoration: "none", marginTop: "8px" }}>
+        <Link to="/" className="search-btn about-cta-link">
           Tìm khách sạn ngay
         </Link>
       </section>

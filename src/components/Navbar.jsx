@@ -4,6 +4,7 @@ export default function Navbar({ currentUser, onLogout }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Logout xong quay về trang chủ để UX rõ ràng cho người dùng.
     onLogout();
     navigate("/");
   };
@@ -16,6 +17,7 @@ export default function Navbar({ currentUser, onLogout }) {
           <span className="logo-text">StayHTM</span>
         </NavLink>
         <nav className="nav">
+          {/* Dùng NavLink để tự động nhận trạng thái active theo URL hiện tại. */}
           <NavLink
             to="/"
             end
@@ -46,6 +48,7 @@ export default function Navbar({ currentUser, onLogout }) {
           <Link to="/contact" className="header-btn">
             Hỗ trợ
           </Link>
+          {/* Đã đăng nhập: hiện tên + nút đăng xuất. Chưa đăng nhập: hiện nút đăng nhập. */}
           {currentUser ? (
             <>
               <span className="header-user">Xin chào, {currentUser.name}</span>

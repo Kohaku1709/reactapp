@@ -9,6 +9,7 @@ export default function Footer() {
                     <p>Nền tảng đặt phòng khách sạn hàng đầu Việt Nam</p>
                 </div>
                 <div className="footer-links">
+                    {/* Link dùng cho route nội bộ để chuyển trang mượt, không reload. */}
                     <div><h4>Về chúng tôi</h4><Link to="/about-us">Giới thiệu</Link><a href="#">Tuyển dụng</a></div>
                     <div><h4>Hỗ trợ</h4><a href="#">Trung tâm trợ giúp</a><Link to="/contact">Liên hệ</Link></div>
                     <div><h4>Đối tác</h4><a href="#">Đăng ký khách sạn</a><a href="#">API</a></div>

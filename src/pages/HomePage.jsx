@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { hotels, destinations } from "../data";
 
-// in ra 5 ngôi sao và tô màu "count" ngôi sao
+// Component con hiển thị 5 sao, sao nào <= count thì tô màu.
 function StarRating({ count }) {
   return (
     <span className="stars">
@@ -16,6 +16,7 @@ function StarRating({ count }) {
 }
 
 function HotelCard({ hotel }) {
+  // Tính phần trăm giảm giá để hiển thị nhãn -xx% trên ảnh.
   const discount = Math.round((1 - hotel.price / hotel.originalPrice) * 100);
   return (
     <div className="hotel-card">
@@ -23,23 +24,22 @@ function HotelCard({ hotel }) {
         <img src={hotel.image} alt={hotel.name} className="hotel-img" />
         {hotel.badge && <span className="hotel-badge">{hotel.badge}</span>}
         <span className="hotel-discount">-{discount}%</span>
-        {/* stopPropagation là chỉ bấm vài trái tim, k nhận là bấm vào khách sạn - k chuyển trang */}
+        {/* stopPropagation: click vào tim chỉ xử lý ở tim, không "lan" sự kiện lên card cha. */}
         <button className="wishlist-btn" onClick={e => e.stopPropagation()}>♡</button>
       </div>
       <div className="hotel-info">
         <div className="hotel-header">
-          {/* hiển thị số sao */}
           <StarRating count={hotel.stars} />
           <span className="hotel-location">📍 {hotel.location}</span>
         </div>
         <h3 className="hotel-name">{hotel.name}</h3>
         <div className="hotel-tags">
-          {/* t chạy trong danh sách tag trong holtes và hiển thị ra t */}
+          {/* map: lặp từng tag trong mảng để render danh sách nhãn tiện ích. */}
           {hotel.tags.map((t) => <span key={t} className="tag">{t}</span>)}
         </div>
         <div className="hotel-rating-row">
           <span className="rating-score">{hotel.rating}</span>
-          {/* hiển thị bằng lời số sao đánh giá suất xắc hoặc tốt */}
+          {/* Hiển thị label theo điểm rating để người dùng hiểu nhanh chất lượng. */}
           <span className="rating-label">{hotel.rating > 4.7 ? "Xuất sắc" : "Tốt"}</span>
           <span className="rating-count">{hotel.reviews.toLocaleString()} đánh giá</span>
         </div>
@@ -58,7 +58,7 @@ function HotelCard({ hotel }) {
 
 export default function HomePage() {
   const [destination, setDestination] = useState("TP. Hồ Chí Minh");
-  // Chuyển state sang kiểu Date để DatePicker hoạt động chuẩn
+  // DatePicker làm việc với kiểu Date/null nên state dùng kiểu này để tránh lỗi.
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [guests, setGuests] = useState("2 khách, 1 phòng");
@@ -67,6 +67,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const filters = ["Tất cả", "5 sao", "4 sao", "Giá thấp nhất", "Đánh giá cao", "Có hồ bơi"];
+  // filter: tạo danh sách mới theo điều kiện đang chọn, giúp UI phản hồi tức thời.
   const filteredHotels = hotels.filter((h) => {
     if (activeFilter === "5 sao") return h.stars === 5;
     if (activeFilter === "4 sao") return h.stars === 4;
@@ -116,6 +117,7 @@ export default function HomePage() {
               </div>
             </div>
             <button className="search-btn" onClick={() => { setSearchDone(true); navigate("/hotels"); }}>
+              {/* navigate: chuyển route không reload trang, đúng kiểu SPA của React Router. */}
               🔍 Tìm kiếm
             </button>
           </div>
@@ -131,6 +133,7 @@ export default function HomePage() {
           </div>
           <div className="destinations-grid">
             {destinations.map((d) => (
+              // Click destination để cập nhật state, từ đó đổi tiêu đề kết quả ở phần dưới.
               <div key={d.name} className="destination-card" onClick={() => setDestination(d.name)}>
                 <img src={d.img} alt={d.name} className="destination-img" />
                 <div className="destination-overlay">
@@ -156,6 +159,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="hotels-grid">
+            {/* key={hotel.id}: giúp React nhận diện đúng item khi render list. */}
             {filteredHotels.map((hotel) => <HotelCard key={hotel.id} hotel={hotel} />)}
           </div>
           <div className="load-more-wrap">

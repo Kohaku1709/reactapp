@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { hotels, destinations } from "../data";
+import { hotels } from "../data";
 
 function StarRating({ count }) {
   return (
@@ -13,7 +13,8 @@ function StarRating({ count }) {
 }
 
 function HotelCard({ hotel }) {
-    const [isWishlisted, setIsWishlisted] = useState(false);
+  // Tim theo từng card: state local giúp minh họa tương tác nhanh cho demo.
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const discount = Math.round((1 - hotel.price / hotel.originalPrice) * 100);
   return (
     <div className="hotel-card">
@@ -21,12 +22,14 @@ function HotelCard({ hotel }) {
         <img src={hotel.image} alt={hotel.name} className="hotel-img" />
         {hotel.badge && <span className="hotel-badge">{hotel.badge}</span>}
         <span className="hotel-discount">-{discount}%</span>
+        {/* stopPropagation: click vào tim chỉ đổi trạng thái tim, không lan sự kiện ra card cha. */}
         <button className="wishlist-btn" onClick={e => {
           e.stopPropagation();
+          // Đảo trạng thái tim sau mỗi lần bấm.
           setIsWishlisted(!isWishlisted);
         }}>
           {isWishlisted ? "❤️" : "♡"}
-          </button>
+        </button>
       </div>
       <div className="hotel-info">
         <div className="hotel-header">
@@ -59,6 +62,7 @@ export default function HotelsPage() {
   const [sortBy, setSortBy] = useState("default");
   const filters = ["Tất cả", "5 sao", "4 sao", "3 sao", "Giá thấp nhất", "Đánh giá cao", "Có hồ bơi"];
 
+  // Filter theo tab đang chọn để người dùng khoanh nhanh danh sách.
   let filtered = hotels.filter((h) => {
     if (activeFilter === "5 sao") return h.stars === 5;
     if (activeFilter === "4 sao") return h.stars === 4;
@@ -69,12 +73,13 @@ export default function HotelsPage() {
     return true;
   });
 
+  // Sort được chạy sau filter để tránh sắp xếp dư thừa dữ liệu không hiển thị.
   if (sortBy === "price-asc") filtered = [...filtered].sort((a, b) => a.price - b.price);
   if (sortBy === "price-desc") filtered = [...filtered].sort((a, b) => b.price - a.price);
   if (sortBy === "rating") filtered = [...filtered].sort((a, b) => b.rating - a.rating);
 
   return (
-    <div className="app" style={{ paddingTop: "68px" }}>
+    <div className="app page-with-header-offset">
       {/* PAGE HERO */}
       <div className="page-hero">
         <div className="page-hero-inner">
@@ -102,7 +107,7 @@ export default function HotelsPage() {
             </div>
           </div>
 
-          <div className="section-header" style={{ marginBottom: "24px" }}>
+          <div className="section-header hotels-result-header">
             <span className="result-count">{filtered.length} khách sạn được tìm thấy</span>
           </div>
 
