@@ -1,81 +1,88 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { hotels, destinations } from "../data";
-
-// Component con hiển thị 5 sao, sao nào <= count thì tô màu.
-function StarRating({ count }) {
-  return (
-    <span className="stars">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={i < count ? "star filled" : "star"}>★</span>
-      ))}
-    </span>
-  );
-}
-
-function HotelCard({ hotel }) {
-  // Tính phần trăm giảm giá để hiển thị nhãn -xx% trên ảnh.
-  const discount = Math.round((1 - hotel.price / hotel.originalPrice) * 100);
-  return (
-    <div className="hotel-card">
-      <div className="hotel-img-wrap">
-        <img src={hotel.image} alt={hotel.name} className="hotel-img" />
-        {hotel.badge && <span className="hotel-badge">{hotel.badge}</span>}
-        <span className="hotel-discount">-{discount}%</span>
-        {/* stopPropagation: click vào tim chỉ xử lý ở tim, không "lan" sự kiện lên card cha. */}
-        <button className="wishlist-btn" onClick={e => e.stopPropagation()}>♡</button>
-      </div>
-      <div className="hotel-info">
-        <div className="hotel-header">
-          <StarRating count={hotel.stars} />
-          <span className="hotel-location">📍 {hotel.location}</span>
-        </div>
-        <h3 className="hotel-name">{hotel.name}</h3>
-        <div className="hotel-tags">
-          {/* map: lặp từng tag trong mảng để render danh sách nhãn tiện ích. */}
-          {hotel.tags.map((t) => <span key={t} className="tag">{t}</span>)}
-        </div>
-        <div className="hotel-rating-row">
-          <span className="rating-score">{hotel.rating}</span>
-          {/* Hiển thị label theo điểm rating để người dùng hiểu nhanh chất lượng. */}
-          <span className="rating-label">{hotel.rating > 4.7 ? "Xuất sắc" : "Tốt"}</span>
-          <span className="rating-count">{hotel.reviews.toLocaleString()} đánh giá</span>
-        </div>
-        <div className="hotel-price-row">
-          <div>
-            <span className="original-price">{hotel.originalPrice.toLocaleString("vi-VN")}₫</span>
-            <div className="current-price">{hotel.price.toLocaleString("vi-VN")}₫<span className="per-night">/đêm</span></div>
-          </div>
-          <button className="book-btn">Xem phòng</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
+import useHotelListing from "../hooks/useHotelListing";
+import HotelCard from "../components/HotelCard";
+import {
+  HOTEL_FILTERS,
+  HOTEL_FILTER_DEFAULTS,
+  HOTEL_SORT_DEFAULT,
+  HOTEL_SORT_OPTIONS,
+  matchesDestination,
+} from "../utils/hotelQuery";
 
 
-export default function HomePage() {
-  const [destination, setDestination] = useState("TP. Hồ Chí Minh");
+export default function HomePage({
+  currentUser,
+  wishlistHotelIds = [],
+  onToggleWishlist = () => { },
+}) {
+  const addressSuggestions = useMemo(() => {
+    const destinationNames = destinations.map((item) => item.name);
+    const locationNames = hotels.map((hotel) => hotel.location);
+    return [...new Set([...destinationNames, ...locationNames])];
+  }, []);
+
+  const [destination, setDestination] = useState("");
   // DatePicker làm việc với kiểu Date/null nên state dùng kiểu này để tránh lỗi.
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
-  const [guests, setGuests] = useState("2 khách, 1 phòng");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [searchDone, setSearchDone] = useState(false);
+  const [visibleRows, setVisibleRows] = useState(4);
+  const gridColumns = useResponsiveGridColumns();
+  const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
   const navigate = useNavigate();
+  const isWishlistEnabled = Boolean(currentUser);
+  const wishlistSet = useMemo(
+    () => new Set(wishlistHotelIds),
+    [wishlistHotelIds],
+  );
 
-  const filters = ["Tất cả", "5 sao", "4 sao", "Giá thấp nhất", "Đánh giá cao", "Có hồ bơi"];
-  // filter: tạo danh sách mới theo điều kiện đang chọn, giúp UI phản hồi tức thời.
-  const filteredHotels = hotels.filter((h) => {
-    if (activeFilter === "5 sao") return h.stars === 5;
-    if (activeFilter === "4 sao") return h.stars === 4;
-    if (activeFilter === "Giá thấp nhất") return h.price < 1200000;
-    if (activeFilter === "Đánh giá cao") return h.rating >= 4.7;
-    if (activeFilter === "Có hồ bơi") return h.tags.some(t => t.toLowerCase().includes("hồ bơi"));
-    return true;
+  const handleSearch = (event) => {
+    event?.preventDefault();
+
+    const normalizedDestination = destination.trim();
+    setDestination(normalizedDestination);
+    setSearchDone(Boolean(normalizedDestination));
+
+    navigate("/hotels", {
+      state: {
+        searchAddress: normalizedDestination,
+      },
+    });
+  };
+
+  const handleDestinationClick = (selectedDestination) => {
+    setDestination(selectedDestination);
+    setSearchDone(true);
+  };
+
+  const filters = HOTEL_FILTERS;
+  const destinationFilter = useMemo(
+    () => (hotel) => matchesDestination(hotel.location, destination),
+    [destination],
+  );
+
+  // Luồng dữ liệu hiển thị: dữ liệu gốc -> lọc theo tab -> lọc theo destination -> sắp xếp -> cắt theo số dòng.
+  const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
+    hotelList: hotels,
+    activeFilter,
+    sortBy,
+    visibleRows,
+    gridColumns,
+    filterOptions: HOTEL_FILTER_DEFAULTS,
+    extraFilter: destinationFilter,
   });
+
+
+  useEffect(() => {
+    // Reset về 4 dòng khi đổi bộ lọc để người dùng dễ quan sát kết quả mới.
+    setVisibleRows(4);
+  }, [activeFilter, destination, sortBy]);
 
   return (
     <div className="app">
@@ -86,7 +93,28 @@ export default function HomePage() {
           <p className="hero-eyebrow">Ưu đãi lên đến 40% · Hơn 500,000 khách sạn toàn cầu</p>
           <h1 className="hero-title">Tìm chỗ nghỉ <span className="hero-highlight">hoàn hảo</span> của bạn</h1>
           <p className="hero-sub">Đặt phòng nhanh chóng, giá tốt nhất, không phí ẩn</p>
-          <div className="search-box">
+          <form className="search-box" onSubmit={handleSearch}>
+            <div className="search-field destination-field">
+              <span className="field-icon">📍</span>
+              <div className="search-field-body">
+                <label>Địa chỉ / Khu vực</label>
+                <input
+                  className="search-address-input"
+                  value={destination}
+                  onChange={(event) => setDestination(event.target.value)}
+                  placeholder="VD: Quận 1, TP.HCM hoặc Đà Nẵng"
+                  list="address-suggestions"
+                />
+                <datalist id="address-suggestions">
+                  {addressSuggestions.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
+            <div className="search-divider" />
+
             <div className="search-field">
               <span className="field-icon">📅</span>
               <div>
@@ -105,7 +133,7 @@ export default function HomePage() {
 
             <div className="search-field">
               <span className="field-icon">📅</span>
-              <div>
+              <div className="search-field-text">
                 <label>Trả phòng</label>
                 <DatePicker
                   selected={checkout}
@@ -116,11 +144,11 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            <button className="search-btn" onClick={() => { setSearchDone(true); navigate("/hotels"); }}>
+            <button type="submit" className="search-btn">
               {/* navigate: chuyển route không reload trang, đúng kiểu SPA của React Router. */}
               🔍 Tìm kiếm
             </button>
-          </div>
+          </form>
         </div>
       </section>
 
@@ -129,12 +157,11 @@ export default function HomePage() {
         <div className="section-inner">
           <div className="section-header">
             <h2 className="section-title">Điểm đến phổ biến</h2>
-            <a href="#" className="see-all">Xem tất cả →</a>
           </div>
           <div className="destinations-grid">
             {destinations.map((d) => (
               // Click destination để cập nhật state, từ đó đổi tiêu đề kết quả ở phần dưới.
-              <div key={d.name} className="destination-card" onClick={() => setDestination(d.name)}>
+              <div key={d.name} className="destination-card" onClick={() => handleDestinationClick(d.name)}>
                 <img src={d.img} alt={d.name} className="destination-img" />
                 <div className="destination-overlay">
                   <h3 className="destination-name">{d.name}</h3>
@@ -153,18 +180,40 @@ export default function HomePage() {
             <h2 className="section-title">{searchDone ? `Kết quả tại "${destination}"` : "Khách sạn nổi bật"}</h2>
             <span className="result-count">{filteredHotels.length} khách sạn</span>
           </div>
-          <div className="filter-bar">
-            {filters.map((f) => (
-              <button key={f} className={`filter-btn ${activeFilter === f ? "active" : ""}`} onClick={() => setActiveFilter(f)}>{f}</button>
-            ))}
+          <div className="hotels-toolbar">
+            <div className="filter-bar">
+              {filters.map((f) => (
+                <button key={f} className={`filter-btn ${activeFilter === f ? "active" : ""}`} onClick={() => setActiveFilter(f)}>{f}</button>
+              ))}
+            </div>
+            <div className="sort-wrap">
+              <label className="sort-label">Sắp xếp:</label>
+              <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                {HOTEL_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="hotels-grid">
             {/* key={hotel.id}: giúp React nhận diện đúng item khi render list. */}
-            {filteredHotels.map((hotel) => <HotelCard key={hotel.id} hotel={hotel} />)}
+            {visibleHotels.map((hotel) => (
+              <HotelCard
+                key={hotel.id}
+                hotel={hotel}
+                interactiveWishlist={isWishlistEnabled}
+                isWishlisted={wishlistSet.has(hotel.id)}
+                onWishlistToggle={onToggleWishlist}
+              />
+            ))}
           </div>
-          <div className="load-more-wrap">
-            <button className="load-more-btn" onClick={() => navigate("/hotels")}>Xem thêm khách sạn</button>
-          </div>
+          {hasMoreHotels && (
+            <div className="load-more-wrap">
+              <button className="load-more-btn" onClick={() => setVisibleRows((prev) => prev + 4)}>
+                Xem thêm
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -1,82 +1,63 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { hotels } from "../data";
+import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
+import useHotelListing from "../hooks/useHotelListing";
+import HotelCard from "../components/HotelCard";
+import {
+  HOTEL_FILTERS,
+  HOTEL_SORT_DEFAULT,
+  HOTEL_SORT_OPTIONS,
+  HOTEL_FILTER_DEFAULTS,
+  matchesDestination,
+} from "../utils/hotelQuery";
 
-function StarRating({ count }) {
-  return (
-    <span className="stars">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={i < count ? "star filled" : "star"}>★</span>
-      ))}
-    </span>
-  );
-}
-
-function HotelCard({ hotel }) {
-  // Tim theo từng card: state local giúp minh họa tương tác nhanh cho demo.
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const discount = Math.round((1 - hotel.price / hotel.originalPrice) * 100);
-  return (
-    <div className="hotel-card">
-      <div className="hotel-img-wrap">
-        <img src={hotel.image} alt={hotel.name} className="hotel-img" />
-        {hotel.badge && <span className="hotel-badge">{hotel.badge}</span>}
-        <span className="hotel-discount">-{discount}%</span>
-        {/* stopPropagation: click vào tim chỉ đổi trạng thái tim, không lan sự kiện ra card cha. */}
-        <button className="wishlist-btn" onClick={e => {
-          e.stopPropagation();
-          // Đảo trạng thái tim sau mỗi lần bấm.
-          setIsWishlisted(!isWishlisted);
-        }}>
-          {isWishlisted ? "❤️" : "♡"}
-        </button>
-      </div>
-      <div className="hotel-info">
-        <div className="hotel-header">
-          <StarRating count={hotel.stars} />
-          <span className="hotel-location">📍 {hotel.location}</span>
-        </div>
-        <h3 className="hotel-name">{hotel.name}</h3>
-        <div className="hotel-tags">
-          {hotel.tags.map((t) => <span key={t} className="tag">{t}</span>)}
-        </div>
-        <div className="hotel-rating-row">
-          <span className="rating-score">{hotel.rating}</span>
-          <span className="rating-label">{hotel.rating > 4.7 ? "Xuất sắc" : "Tốt"}</span>
-          <span className="rating-count">{hotel.reviews.toLocaleString()} đánh giá</span>
-        </div>
-        <div className="hotel-price-row">
-          <div>
-            <span className="original-price">{hotel.originalPrice.toLocaleString("vi-VN")}₫</span>
-            <div className="current-price">{hotel.price.toLocaleString("vi-VN")}₫<span className="per-night">/đêm</span></div>
-          </div>
-          <button className="book-btn">Xem phòng</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function HotelsPage() {
+export default function HotelsPage({
+  currentUser,
+  wishlistHotelIds = [],
+  onToggleWishlist = () => { },
+}) {
+  const routeLocation = useLocation();
+  const initialSearchAddress = routeLocation.state?.searchAddress;
   const [activeFilter, setActiveFilter] = useState("Tất cả");
-  const [sortBy, setSortBy] = useState("default");
-  const filters = ["Tất cả", "5 sao", "4 sao", "3 sao", "Giá thấp nhất", "Đánh giá cao", "Có hồ bơi"];
+  const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
+  const [addressQuery, setAddressQuery] = useState(
+    typeof initialSearchAddress === "string" ? initialSearchAddress.trim() : "",
+  );
+  const [visibleRows, setVisibleRows] = useState(4);
+  const gridColumns = useResponsiveGridColumns();
+  const filters = HOTEL_FILTERS;
+  const isWishlistEnabled = Boolean(currentUser);
+  const wishlistSet = useMemo(
+    () => new Set(wishlistHotelIds),
+    [wishlistHotelIds],
+  );
+  const addressFilter = useMemo(
+    () => (hotel) => matchesDestination(hotel.location, addressQuery),
+    [addressQuery],
+  );
 
-  // Filter theo tab đang chọn để người dùng khoanh nhanh danh sách.
-  let filtered = hotels.filter((h) => {
-    if (activeFilter === "5 sao") return h.stars === 5;
-    if (activeFilter === "4 sao") return h.stars === 4;
-    if (activeFilter === "3 sao") return h.stars === 3;
-    if (activeFilter === "Giá thấp nhất") return h.price < 1200000;
-    if (activeFilter === "Đánh giá cao") return h.rating >= 4.7;
-    if (activeFilter === "Có hồ bơi") return h.tags.some(t => t.toLowerCase().includes("hồ bơi"));
-    return true;
+  useEffect(() => {
+    const searchAddress = routeLocation.state?.searchAddress;
+    if (typeof searchAddress === "string") {
+      setAddressQuery(searchAddress.trim());
+    }
+  }, [routeLocation.state]);
+
+  const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
+    hotelList: hotels,
+    activeFilter,
+    sortBy,
+    visibleRows,
+    gridColumns,
+    filterOptions: HOTEL_FILTER_DEFAULTS,
+    extraFilter: addressFilter,
   });
 
-  // Sort được chạy sau filter để tránh sắp xếp dư thừa dữ liệu không hiển thị.
-  if (sortBy === "price-asc") filtered = [...filtered].sort((a, b) => a.price - b.price);
-  if (sortBy === "price-desc") filtered = [...filtered].sort((a, b) => b.price - a.price);
-  if (sortBy === "rating") filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+  useEffect(() => {
+    // Khi đổi filter/sort, quay về 4 dòng đầu để trải nghiệm nhất quán.
+    setVisibleRows(4);
+  }, [activeFilter, sortBy, addressQuery]);
 
   return (
     <div className="app page-with-header-offset">
@@ -99,21 +80,55 @@ export default function HotelsPage() {
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
               <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                <option value="default">Mặc định</option>
-                <option value="price-asc">Giá tăng dần</option>
-                <option value="price-desc">Giá giảm dần</option>
-                <option value="rating">Đánh giá cao nhất</option>
+                {HOTEL_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </select>
             </div>
           </div>
 
+          <div className="address-filter-wrap">
+            <span className="address-filter-icon">📍</span>
+            <input
+              className="address-filter-input"
+              value={addressQuery}
+              onChange={(event) => setAddressQuery(event.target.value)}
+              placeholder="Lọc nhanh theo địa chỉ..."
+            />
+            {addressQuery && (
+              <button
+                className="address-clear-btn"
+                type="button"
+                onClick={() => setAddressQuery("")}
+              >
+                Xóa
+              </button>
+            )}
+          </div>
+
           <div className="section-header hotels-result-header">
-            <span className="result-count">{filtered.length} khách sạn được tìm thấy</span>
+            <span className="result-count">{filteredHotels.length} khách sạn được tìm thấy</span>
           </div>
 
           <div className="hotels-grid">
-            {filtered.map((hotel) => <HotelCard key={hotel.id} hotel={hotel} />)}
+            {visibleHotels.map((hotel) => (
+              <HotelCard
+                key={hotel.id}
+                hotel={hotel}
+                interactiveWishlist={isWishlistEnabled}
+                isWishlisted={wishlistSet.has(hotel.id)}
+                onWishlistToggle={onToggleWishlist}
+              />
+            ))}
           </div>
+
+          {hasMoreHotels && (
+            <div className="load-more-wrap">
+              <button className="load-more-btn" onClick={() => setVisibleRows((prev) => prev + 4)}>
+                Xem thêm
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

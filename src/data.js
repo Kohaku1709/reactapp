@@ -1,160 +1,252 @@
-// File này chỉ chứa dữ liệu mẫu cho demo.
-// Tách dữ liệu riêng giúp component gọn hơn và dễ thay dữ liệu sau này.
-
-// Danh sách khách sạn dùng cho HomePage và HotelsPage.
-export const hotels = [
-  {
-    id: 1,
-    name: "The Grand Saigon Palace",
-    location: "Quận 1, TP.HCM",
-    rating: 4.9,
-    reviews: 2341,
-    price: 2850000,
-    originalPrice: 3800000,
-    image:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
-    tags: ["Hồ bơi vô cực", "Spa", "Nhà hàng"],
-    badge: "Bán chạy nhất",
-    stars: 5,
-  },
-  {
-    id: 2,
-    name: "Mekong River Boutique",
-    location: "Bến Nghé, TP.HCM",
-    rating: 4.7,
-    reviews: 987,
-    price: 1450000,
-    originalPrice: 1900000,
-    image:
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&q=80",
-    tags: ["View sông", "Bữa sáng miễn phí", "Gym"],
-    badge: "Giá tốt",
-    stars: 4,
-  },
-  {
-    id: 3,
-    name: "Lotus Heritage Resort",
-    location: "Thủ Đức, TP.HCM",
-    rating: 4.8,
-    reviews: 1523,
-    price: 3200000,
-    originalPrice: 4100000,
-    image:
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80",
-    tags: ["Biệt thự riêng", "Hồ bơi", "Butler service"],
-    badge: "Sang trọng",
-    stars: 5,
-  },
-  {
-    id: 4,
-    name: "Cityscape Business Hotel",
-    location: "Bình Thạnh, TP.HCM",
-    rating: 4.5,
-    reviews: 654,
-    price: 980000,
-    originalPrice: 1200000,
-    image:
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&q=80",
-    tags: ["Trung tâm thành phố", "Wifi tốc độ cao", "Coworking"],
-    badge: "Giá rẻ",
-    stars: 4,
-  },
-  {
-    id: 5,
-    name: "Indochine Sky Suites",
-    location: "Quận 3, TP.HCM",
-    rating: 4.6,
-    reviews: 1102,
-    price: 1750000,
-    originalPrice: 2300000,
-    image:
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&q=80",
-    tags: ["Tầng thượng", "Bar", "Lịch sử"],
-    badge: "Đặc sắc",
-    stars: 4,
-  },
-  {
-    id: 6,
-    name: "Pearl Riverside Escape",
-    location: "Quận 4, TP.HCM",
-    rating: 4.4,
-    reviews: 431,
-    price: 820000,
-    originalPrice: 1100000,
-    image:
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80",
-    tags: ["Ven sông", "Yên tĩnh", "Bếp riêng"],
-    badge: null,
-    stars: 3,
-  },
-  {
-    id: 7,
-    name: "Azure Rooftop Hotel",
-    location: "Quận 7, TP.HCM",
-    rating: 4.3,
-    reviews: 312,
-    price: 1100000,
-    originalPrice: 1400000,
-    image:
-      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&q=80",
-    tags: ["Rooftop pool", "Bar", "Gym"],
-    badge: null,
-    stars: 4,
-  },
-  {
-    id: 8,
-    name: "Saigon Heritage Inn",
-    location: "Quận 1, TP.HCM",
-    rating: 4.2,
-    reviews: 218,
-    price: 650000,
-    originalPrice: 850000,
-    image:
-      "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?w=600&q=80",
-    tags: ["Lịch sử", "Trung tâm", "Bữa sáng"],
-    badge: null,
-    stars: 3,
-  },
-  {
-    id: 9,
-    name: "The Riviera Suites",
-    location: "Quận 2, TP.HCM",
-    rating: 4.8,
-    reviews: 876,
-    price: 2400000,
-    originalPrice: 3100000,
-    image:
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&q=80",
-    tags: ["Hồ bơi", "Spa", "Nhà hàng fine dining"],
-    badge: "Mới mở",
-    stars: 5,
-  },
+// File này sinh dữ liệu mẫu cho đồ án.
+// Mục tiêu: dữ liệu đủ đa dạng để test UI/filter/sort, không mô phỏng thị trường 100% chính xác.
+const hotelNamePrefixes = [
+  "Aurora",
+  "Lotus",
+  "Sapphire",
+  "Golden",
+  "Emerald",
+  "Coral",
+  "Velvet",
+  "Atlas",
+  "Sunrise",
+  "Luna",
+  "Bamboo",
+  "Ivory",
+  "Harmony",
+  "Ocean",
+  "Heritage",
 ];
+
+const hotelNameStyles = [
+  "Riverside",
+  "Skyline",
+  "Garden",
+  "Boutique",
+  "Harbor",
+  "Peak",
+  "Lagoon",
+  "Old Quarter",
+  "Forest",
+  "Seaview",
+  "Central",
+  "Hilltop",
+  "Premier",
+  "Sunset",
+  "Bayfront",
+];
+
+const hotelNameTypes = [
+  "Hotel",
+  "Resort",
+  "Suites",
+  "Retreat",
+  "Inn",
+  "Villas",
+  "Residence",
+  "Lodge",
+  "Haven",
+  "Palace",
+];
+
+const hotelLocations = [
+  "Quận 1, TP.HCM",
+  "Quận 3, TP.HCM",
+  "Quận 7, TP.HCM",
+  "Thủ Đức, TP.HCM",
+  "Hoàn Kiếm, Hà Nội",
+  "Tây Hồ, Hà Nội",
+  "Sơn Trà, Đà Nẵng",
+  "Hải Châu, Đà Nẵng",
+  "Cẩm Châu, Hội An",
+  "Trần Phú, Nha Trang",
+  "Dương Đông, Phú Quốc",
+  "Bãi Cháy, Hạ Long",
+  "TP. Đà Lạt, Lâm Đồng",
+  "Ninh Kiều, Cần Thơ",
+  "Mũi Né, Bình Thuận",
+  "TP. Vũng Tàu, Bà Rịa - Vũng Tàu",
+  "Tràng An, Ninh Bình",
+  "Sapa, Lào Cai",
+  "Tam Đảo, Vĩnh Phúc",
+  "Cát Bà, Hải Phòng",
+  "TP. Huế, Thừa Thiên Huế",
+  "TP. Quy Nhơn, Bình Định",
+  "TP. Đồng Hới, Quảng Bình",
+  "Bố Trạch, Quảng Bình",
+  "TP. Buôn Ma Thuột, Đắk Lắk",
+  "TP. Pleiku, Gia Lai",
+  "TP. Tuy Hòa, Phú Yên",
+  "Cam Ranh, Khánh Hòa",
+  "Mộc Châu, Sơn La",
+  "Mũi Cà Mau, Cà Mau",
+];
+
+const hotelTagPool = [
+  "Hồ bơi",
+  "Spa",
+  "Nhà hàng",
+  "Gym",
+  "Bữa sáng miễn phí",
+  "View biển",
+  "View sông",
+  "Phòng gia đình",
+  "Wifi tốc độ cao",
+  "Lễ tân 24/7",
+  "Đưa đón sân bay",
+  "Rooftop bar",
+  "Bãi biển riêng",
+  "Kid club",
+  "Pet friendly",
+  "Coworking space",
+  "Phong cách boutique",
+  "Check-in đẹp",
+  "Yên tĩnh",
+  "Trung tâm thành phố",
+];
+
+const hotelBadgePool = [
+  "Bán chạy",
+  "Giá tốt",
+  "Mới mở",
+  "Gia đình yêu thích",
+  "Nghỉ dưỡng cao cấp",
+  "Ưu đãi cuối tuần",
+  "Đặt nhiều hôm nay",
+];
+
+const getHotelImage = (id) => `https://picsum.photos/seed/hotel-${id}/900/600`;
+const getDestinationImage = (name) =>
+  `https://picsum.photos/seed/destination-${encodeURIComponent(name)}/600/400`;
+
+const roundToNearest50k = (value) => Math.round(value / 50000) * 50000;
+
+const getLocationDemandFactor = (location) => {
+  if (
+    /(Quận 1|Hoàn Kiếm|Tây Hồ|Sơn Trà|Cam Ranh|Phú Quốc|Bãi Cháy|Trần Phú)/.test(
+      location,
+    )
+  ) {
+    return 1.28;
+  }
+  if (
+    /(Hội An|Đà Lạt|Sapa|Mũi Né|Cát Bà|Ninh Bình|Huế|Nha Trang)/.test(location)
+  ) {
+    return 1.14;
+  }
+  if (/(Pleiku|Cà Mau|Buôn Ma Thuột|Đồng Hới|Tuy Hòa)/.test(location)) {
+    return 0.92;
+  }
+  return 1;
+};
+
+const getBadge = ({ rating, reviews, discountRate, stars, id }) => {
+  if (rating >= 4.7 && reviews >= 1600) return hotelBadgePool[0];
+  if (discountRate >= 0.22) return hotelBadgePool[1];
+  if (id % 17 === 0) return hotelBadgePool[2];
+  if (stars === 5 && rating >= 4.6) return hotelBadgePool[4];
+  if (stars >= 4 && id % 11 === 0) return hotelBadgePool[3];
+  if (id % 13 === 0) return hotelBadgePool[5];
+  return null;
+};
+
+const ratingScale = Array.from({ length: 31 }, (_, idx) =>
+  Number((5 - idx * 0.1).toFixed(1)),
+);
+
+export const hotels = Array.from({ length: 100 }, (_, index) => {
+  const id = index + 1;
+  const location = hotelLocations[id % hotelLocations.length];
+  // Dùng thang 0.1 để có nhiều mức rating (5.0, 4.9, ..., 2.0) thay vì lặp quá ít giá trị.
+  const rating = ratingScale[(id * 7) % ratingScale.length];
+  const stars = rating >= 4.6 ? 5 : rating >= 4.0 ? 4 : rating >= 3.2 ? 3 : 2;
+  const demandFactor = getLocationDemandFactor(location);
+  const basePriceByStars = {
+    2: 540000,
+    3: 920000,
+    4: 1580000,
+    5: 2760000,
+  };
+  const seasonalFactor = 0.92 + ((id * 5) % 9) * 0.03;
+  const price = roundToNearest50k(
+    basePriceByStars[stars] * demandFactor * seasonalFactor,
+  );
+  // Giá gốc được suy ra từ giá hiện tại + mức giảm để sort khuyến mãi dùng chung.
+  const discountRate = Number(
+    (0.08 + ((id * 11) % 8) * 0.025 + (rating < 3.5 ? 0.05 : 0)).toFixed(3),
+  );
+  const originalPrice = roundToNearest50k(
+    price / (1 - Math.min(discountRate, 0.33)),
+  );
+  const reviews = Math.max(
+    60,
+    Math.round(
+      150 + ((id * 71) % 1400) + demandFactor * 850 + (rating - 3) * 520,
+    ),
+  );
+  const tagStart = (id * 3) % hotelTagPool.length;
+  const locationHintTag =
+    /biển|Bãi|Cam Ranh|Phú Quốc|Mũi Né|Nha Trang|Vũng Tàu/i.test(location)
+      ? "View biển"
+      : /sông|Riverside|Ninh Kiều/i.test(location)
+        ? "View sông"
+        : /Sapa|Đà Lạt|Tam Đảo|Mộc Châu/i.test(location)
+          ? "Check-in đẹp"
+          : "Trung tâm thành phố";
+  const serviceTag = stars >= 4 ? "Spa" : "Bữa sáng miễn phí";
+  const convenienceTag = stars >= 5 ? "Đưa đón sân bay" : "Wifi tốc độ cao";
+
+  return {
+    id,
+    name: `${hotelNamePrefixes[id % hotelNamePrefixes.length]} ${
+      hotelNameStyles[(id * 2) % hotelNameStyles.length]
+    } ${hotelNameTypes[(id * 3) % hotelNameTypes.length]}`,
+    location,
+    rating,
+    reviews,
+    price,
+    originalPrice,
+    image: getHotelImage(id),
+    tags: [
+      locationHintTag,
+      serviceTag,
+      hotelTagPool[(tagStart + (stars >= 4 ? 5 : 9)) % hotelTagPool.length],
+      convenienceTag,
+    ],
+    badge: getBadge({ rating, reviews, discountRate, stars, id }),
+    stars,
+  };
+});
 
 export const destinations = [
   {
+    name: "TP.HCM",
+    img: getDestinationImage("tp-ho-chi-minh"),
+    hotels: "2,345",
+  },
+  {
     name: "Hà Nội",
-    img: "https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?w=300&q=80",
+    img: getDestinationImage("ha-noi"),
     hotels: "1,234",
   },
   {
     name: "Đà Nẵng",
-    img: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=300&q=80",
+    img: getDestinationImage("da-nang"),
     hotels: "876",
   },
   {
     name: "Hội An",
-    img: "https://images.unsplash.com/photo-1528127269322-539801943592?w=300&q=80",
+    img: getDestinationImage("hoi-an"),
     hotels: "543",
   },
   {
     name: "Phú Quốc",
-    img: "https://images.unsplash.com/photo-1602940659805-770d1b3b9911?w=300&q=80",
+    img: getDestinationImage("phu-quoc"),
     hotels: "412",
   },
   {
     name: "Nha Trang",
-    img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&q=80",
+    img: getDestinationImage("nha-trang"),
     hotels: "721",
   },
 ];

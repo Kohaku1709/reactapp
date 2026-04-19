@@ -1,0 +1,61 @@
+/* Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap");
+
+/* Reset + design tokens */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --brand: #0057ff;
+    --brand-dark: #003fcc;
+    --brand-light: #e8f0ff;
+    --gold: #f5a623;
+    --dark: #0a0f1e;
+    --text: #1a2340;
+    --muted: #6b7a99;
+    --border: #e4e9f2;
+    --surface: #f7f9fc;
+    --white: #ffffff;
+    --danger: #ff4757;
+
+    --radius: 16px;
+    --radius-sm: 10px;
+
+    --shadow: 0 4px 24px rgba(0, 87, 255, 0.1);
+    --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.14);
+
+    --font-head: "Quicksand", sans-serif;
+    --font-body: "Nunito", sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--surface);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -ms-overflow-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+#root {
+    min-height: 100vh;
+}

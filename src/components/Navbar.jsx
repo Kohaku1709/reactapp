@@ -1,13 +1,14 @@
+import { memo, useCallback } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
-export default function Navbar({ currentUser, onLogout }) {
+function Navbar({ currentUser, onLogout }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     // Logout xong quay về trang chủ để UX rõ ràng cho người dùng.
     onLogout();
     navigate("/");
-  };
+  }, [navigate, onLogout]);
 
   return (
     <header className="header">
@@ -31,6 +32,14 @@ export default function Navbar({ currentUser, onLogout }) {
           >
             Khách sạn
           </NavLink>
+          {currentUser && (
+            <NavLink
+              to="/wishlist"
+              className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
+            >
+              Yêu thích
+            </NavLink>
+          )}
           <NavLink
             to="/about-us"
             className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
@@ -66,3 +75,5 @@ export default function Navbar({ currentUser, onLogout }) {
     </header>
   );
 }
+
+export default memo(Navbar);

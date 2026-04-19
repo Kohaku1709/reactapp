@@ -20,14 +20,8 @@ export default function LoginPage({ currentUser, onLogin }) {
         e.preventDefault();
 
         // Validate cơ bản cho đồ án: không cho rỗng.
-        if (!email.trim() || !password.trim()) {
-            setError("Vui lòng nhập đầy đủ email và mật khẩu.");
-            return;
-        }
-
-        // Validate thêm: mật khẩu tối thiểu 4 ký tự.
-        if (password.trim().length < 4) {
-            setError("Mật khẩu tối thiểu 4 ký tự.");
+        if (!email.trim() || !password.trim() || password.trim().length < 4) {
+            setError("Vui lòng nhập đúng định dạng.");
             return;
         }
 
