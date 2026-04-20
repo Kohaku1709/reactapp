@@ -1,10 +1,17 @@
 import { useMemo } from "react";
 import { filterHotels, sortHotels } from "../utils/hotelQuery";
 
-/**
- * Hook dùng chung cho Home/Hotels để giữ pipeline dữ liệu nhất quán:
- * raw -> filter -> sort -> paginate.
- */
+// Called by: HomePage và HotelsPage.
+// Params:
+// - hotelList: mảng hotel gốc
+// - activeFilter: một giá trị trong HOTEL_FILTERS
+// - sortBy: một value trong HOTEL_SORT_OPTIONS
+// - visibleRows: số dòng hiển thị (số nguyên dương)
+// - gridColumns: số cột (1|2|3)
+// - filterOptions: object ngưỡng lọc
+// - extraFilter: function(hotel)=>boolean hoặc undefined
+// Output: { filteredHotels, sortedHotels, visibleHotels, hasMoreHotels }.
+// Does: tạo pipeline dữ liệu nhất quán: filter -> sort -> paginate.
 export default function useHotelListing({
   hotelList,
   activeFilter,

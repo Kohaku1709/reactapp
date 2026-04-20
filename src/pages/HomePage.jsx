@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -6,6 +6,7 @@ import { hotels, destinations } from "../data";
 import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
 import useHotelListing from "../hooks/useHotelListing";
 import HotelCard from "../components/HotelCard";
+import { useUser } from "../context/userContext";
 import {
   HOTEL_FILTERS,
   HOTEL_FILTER_DEFAULTS,
@@ -14,12 +15,12 @@ import {
   matchesDestination,
 } from "../utils/hotelQuery";
 
-
-export default function HomePage({
-  currentUser,
-  wishlistHotelIds = [],
-  onToggleWishlist = () => { },
-}) {
+// Called by: route "/" trong App.
+// Params: không nhận props; đọc currentUser, wishlistHotelIds, onToggleWishlist từ useUser().
+// Output: trang chủ gồm search box, điểm đến phổ biến, danh sách khách sạn.
+// Does: điều phối toàn bộ luồng tìm kiếm ban đầu và chuyển sang trang /hotels.
+export default function HomePage() {
+  const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
   const addressSuggestions = useMemo(() => {
     const destinationNames = destinations.map((item) => item.name);
     const locationNames = hotels.map((hotel) => hotel.location);
@@ -27,7 +28,6 @@ export default function HomePage({
   }, []);
 
   const [destination, setDestination] = useState("");
-  // DatePicker làm việc với kiểu Date/null nên state dùng kiểu này để tránh lỗi.
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -42,6 +42,10 @@ export default function HomePage({
     [wishlistHotelIds],
   );
 
+  // Called by: submit form tìm kiếm.
+  // Params: event submit (có thể undefined nếu gọi thủ công).
+  // Output: navigate("/hotels", { state: { searchAddress } }).
+  // Does: chuẩn hóa destination, cập nhật UI state và gửi query qua route state.
   const handleSearch = (event) => {
     event?.preventDefault();
 
@@ -56,18 +60,22 @@ export default function HomePage({
     });
   };
 
+  // Called by: click card điểm đến ở section "Điểm đến phổ biến".
+  // Params: selectedDestination. Accepted values: chuỗi tên điểm đến hợp lệ.
+  // Output: destination/searchDone state mới.
+  // Does: áp sẵn địa điểm để người dùng lọc nhanh.
   const handleDestinationClick = (selectedDestination) => {
     setDestination(selectedDestination);
     setSearchDone(true);
   };
 
+  // filters: danh sách nhãn filter cố định lấy từ HOTEL_FILTERS.
   const filters = HOTEL_FILTERS;
   const destinationFilter = useMemo(
     () => (hotel) => matchesDestination(hotel.location, destination),
     [destination],
   );
 
-  // Luồng dữ liệu hiển thị: dữ liệu gốc -> lọc theo tab -> lọc theo destination -> sắp xếp -> cắt theo số dòng.
   const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
     hotelList: hotels,
     activeFilter,
@@ -78,15 +86,14 @@ export default function HomePage({
     extraFilter: destinationFilter,
   });
 
-
+  // Does: reset phân trang về 4 dòng khi tiêu chí lọc thay đổi để UX nhất quán.
   useEffect(() => {
-    // Reset về 4 dòng khi đổi bộ lọc để người dùng dễ quan sát kết quả mới.
     setVisibleRows(4);
   }, [activeFilter, destination, sortBy]);
 
   return (
     <div className="app">
-      {/* HERO */}
+
       <section className="hero">
         <div className="hero-bg"><div className="hero-overlay" /></div>
         <div className="hero-content">
@@ -145,14 +152,14 @@ export default function HomePage({
               </div>
             </div>
             <button type="submit" className="search-btn">
-              {/* navigate: chuyển route không reload trang, đúng kiểu SPA của React Router. */}
+
               🔍 Tìm kiếm
             </button>
           </form>
         </div>
       </section>
 
-      {/* POPULAR DESTINATIONS */}
+
       <section className="section destinations-section">
         <div className="section-inner">
           <div className="section-header">
@@ -160,7 +167,6 @@ export default function HomePage({
           </div>
           <div className="destinations-grid">
             {destinations.map((d) => (
-              // Click destination để cập nhật state, từ đó đổi tiêu đề kết quả ở phần dưới.
               <div key={d.name} className="destination-card" onClick={() => handleDestinationClick(d.name)}>
                 <img src={d.img} alt={d.name} className="destination-img" />
                 <div className="destination-overlay">
@@ -173,7 +179,7 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* HOTEL LISTINGS */}
+
       <section className="section hotels-section">
         <div className="section-inner">
           <div className="section-header">
@@ -196,7 +202,7 @@ export default function HomePage({
             </div>
           </div>
           <div className="hotels-grid">
-            {/* key={hotel.id}: giúp React nhận diện đúng item khi render list. */}
+
             {visibleHotels.map((hotel) => (
               <HotelCard
                 key={hotel.id}

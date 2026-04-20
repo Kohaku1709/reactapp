@@ -4,6 +4,7 @@ import { hotels } from "../data";
 import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
 import useHotelListing from "../hooks/useHotelListing";
 import HotelCard from "../components/HotelCard";
+import { useUser } from "../context/userContext";
 import {
   HOTEL_FILTERS,
   HOTEL_SORT_DEFAULT,
@@ -12,11 +13,13 @@ import {
   matchesDestination,
 } from "../utils/hotelQuery";
 
-export default function HotelsPage({
-  currentUser,
-  wishlistHotelIds = [],
-  onToggleWishlist = () => { },
-}) {
+// Called by: route "/hotels" trong App.
+// Params: không nhận props; dùng state/action từ useUser().
+// Output: danh sách khách sạn có filter, sort, lọc địa chỉ, load-more.
+// Does: là trang listing chính sau khi người dùng tìm kiếm từ HomePage.
+export default function HotelsPage() {
+  const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
+  // routeLocation.state?.searchAddress nhận dữ liệu do HomePage gửi qua navigate.
   const routeLocation = useLocation();
   const initialSearchAddress = routeLocation.state?.searchAddress;
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -32,11 +35,13 @@ export default function HotelsPage({
     () => new Set(wishlistHotelIds),
     [wishlistHotelIds],
   );
+  // addressFilter: hàm filter phụ truyền cho useHotelListing.
   const addressFilter = useMemo(
     () => (hotel) => matchesDestination(hotel.location, addressQuery),
     [addressQuery],
   );
 
+  // Does: đồng bộ input địa chỉ khi state của route thay đổi.
   useEffect(() => {
     const searchAddress = routeLocation.state?.searchAddress;
     if (typeof searchAddress === "string") {
@@ -44,6 +49,7 @@ export default function HotelsPage({
     }
   }, [routeLocation.state]);
 
+  // Does: dùng pipeline chung filter -> sort -> paginate để đảm bảo hành vi nhất quán.
   const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
     hotelList: hotels,
     activeFilter,
@@ -54,14 +60,14 @@ export default function HotelsPage({
     extraFilter: addressFilter,
   });
 
+  // Does: reset visibleRows khi đổi filter/sort/address.
   useEffect(() => {
-    // Khi đổi filter/sort, quay về 4 dòng đầu để trải nghiệm nhất quán.
     setVisibleRows(4);
   }, [activeFilter, sortBy, addressQuery]);
 
   return (
     <div className="app page-with-header-offset">
-      {/* PAGE HERO */}
+
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Tất cả khách sạn</h1>

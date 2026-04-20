@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import { stats, values } from "../data"
 
+// Called by: route "/about-us".
+// Params: không có.
+// Output: trang giới thiệu thương hiệu, số liệu và giá trị cốt lõi.
+// Does: render nội dung tĩnh từ data.js bằng các section layout.
 export default function AboutPage() {
   return (
     <div className="app page-with-header-offset">
 
-      {/* PAGE HERO */}
+
       <div className="page-hero about-hero">
         <div className="page-hero-inner">
           <p className="hero-eyebrow">Câu chuyện của chúng tôi</p>
@@ -14,7 +18,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* STORY */}
+
       <section className="section section-white">
         <div className="section-inner about-story">
           <div className="about-text">
@@ -32,11 +36,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* STATS */}
+
       <section className="section section-brand-compact">
         <div className="section-inner">
           <div className="stats-grid">
-            {/* Dữ liệu tách ở data.js giúp thay số liệu mà không phải đụng layout. */}
+
             {stats.map((s) => (
               <div key={s.label} className="stat-card">
                 <div className="stat-number">{s.number}</div>
@@ -47,14 +51,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* VALUES */}
+
       <section className="section section-surface">
         <div className="section-inner">
           <div className="section-header section-header-centered">
             <h2 className="section-title section-title-centered">Giá trị cốt lõi</h2>
           </div>
           <div className="values-grid">
-            {/* map từ mảng values để tái sử dụng UI card và dễ mở rộng nội dung. */}
+
             {values.map((v) => (
               <div key={v.title} className="value-card">
                 <div className="value-icon">{v.icon}</div>
@@ -66,7 +70,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
+
       <section className="about-cta">
         <h2>Sẵn sàng khám phá Việt Nam cùng StayHTM?</h2>
         <p>Hàng ngàn khách sạn đang chờ bạn với mức giá tốt nhất</p>

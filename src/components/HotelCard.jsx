@@ -2,6 +2,14 @@ import { memo } from "react";
 import StarRating from "./StarRating";
 import { getDiscountPercent } from "../utils/hotelPricing";
 
+// Called by: HomePage/HotelsPage/WishlistPage khi map danh sách khách sạn.
+// Params:
+// - hotel: object khách sạn (id, name, location, rating, price, tags...)
+// - interactiveWishlist: boolean (true cho phép toggle wishlist)
+// - isWishlisted: boolean (trạng thái tim)
+// - onWishlistToggle: function(hotelId)
+// Output: 1 card khách sạn đầy đủ thông tin hiển thị.
+// Does: render thông tin khách sạn + xử lý nút wishlist khi được bật.
 function HotelCard({
     hotel,
     interactiveWishlist = false,
@@ -10,6 +18,10 @@ function HotelCard({
 }) {
     const discount = getDiscountPercent(hotel);
 
+    // Called by: click nút tim trên card.
+    // Params: event click từ button.
+    // Output: gọi onWishlistToggle(hotel.id) nếu interactiveWishlist=true.
+    // Does: ngăn event nổi bọt và chuyển yêu cầu toggle lên component cha.
     const handleWishlistClick = (e) => {
         e.stopPropagation();
         if (!interactiveWishlist) return;

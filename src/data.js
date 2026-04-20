@@ -1,5 +1,3 @@
-// File này sinh dữ liệu mẫu cho đồ án.
-// Mục tiêu: dữ liệu đủ đa dạng để test UI/filter/sort, không mô phỏng thị trường 100% chính xác.
 const hotelNamePrefixes = [
   "Aurora",
   "Lotus",
@@ -115,12 +113,28 @@ const hotelBadgePool = [
   "Đặt nhiều hôm nay",
 ];
 
+// Called by: hotels generator bên dưới.
+// Params: id. Accepted values: số nguyên dương.
+// Output: URL ảnh giả lập theo seed cố định.
+// Does: đảm bảo mỗi hotel có ảnh ổn định giữa các lần render.
 const getHotelImage = (id) => `https://picsum.photos/seed/hotel-${id}/900/600`;
+// Called by: destinations export.
+// Params: name. Accepted values: chuỗi tên điểm đến.
+// Output: URL ảnh đại diện theo seed.
+// Does: tạo ảnh mô phỏng nhất quán cho destination card.
 const getDestinationImage = (name) =>
   `https://picsum.photos/seed/destination-${encodeURIComponent(name)}/600/400`;
 
+// Called by: tính price/originalPrice.
+// Params: value. Accepted values: số tiền dương.
+// Output: số tiền làm tròn bội 50.000.
+// Does: đồng bộ cách hiển thị giá theo mặt bằng thực tế.
 const roundToNearest50k = (value) => Math.round(value / 50000) * 50000;
 
+// Called by: hotels generator.
+// Params: location (string).
+// Output: hệ số nhu cầu (ví dụ 1.28, 1.14, 0.92, 1).
+// Does: điều chỉnh giá/review theo độ hot của khu vực.
 const getLocationDemandFactor = (location) => {
   if (
     /(Quận 1|Hoàn Kiếm|Tây Hồ|Sơn Trà|Cam Ranh|Phú Quốc|Bãi Cháy|Trần Phú)/.test(
@@ -140,6 +154,10 @@ const getLocationDemandFactor = (location) => {
   return 1;
 };
 
+// Called by: hotels generator.
+// Params: { rating, reviews, discountRate, stars, id }.
+// Output: nhãn badge tương ứng hoặc null.
+// Does: gán badge marketing theo rule ưu tiên.
 const getBadge = ({ rating, reviews, discountRate, stars, id }) => {
   if (rating >= 4.7 && reviews >= 1600) return hotelBadgePool[0];
   if (discountRate >= 0.22) return hotelBadgePool[1];
@@ -154,10 +172,13 @@ const ratingScale = Array.from({ length: 31 }, (_, idx) =>
   Number((5 - idx * 0.1).toFixed(1)),
 );
 
+// Called by: HomePage/HotelsPage/WishlistPage.
+// Params: không có trực tiếp (generator nội bộ theo index).
+// Output: mảng 100 hotel object hoàn chỉnh.
+// Does: tạo dữ liệu giả lập nhất quán để test filter/sort/wishlist.
 export const hotels = Array.from({ length: 100 }, (_, index) => {
   const id = index + 1;
   const location = hotelLocations[id % hotelLocations.length];
-  // Dùng thang 0.1 để có nhiều mức rating (5.0, 4.9, ..., 2.0) thay vì lặp quá ít giá trị.
   const rating = ratingScale[(id * 7) % ratingScale.length];
   const stars = rating >= 4.6 ? 5 : rating >= 4.0 ? 4 : rating >= 3.2 ? 3 : 2;
   const demandFactor = getLocationDemandFactor(location);
@@ -171,7 +192,6 @@ export const hotels = Array.from({ length: 100 }, (_, index) => {
   const price = roundToNearest50k(
     basePriceByStars[stars] * demandFactor * seasonalFactor,
   );
-  // Giá gốc được suy ra từ giá hiện tại + mức giảm để sort khuyến mãi dùng chung.
   const discountRate = Number(
     (0.08 + ((id * 11) % 8) * 0.025 + (rating < 3.5 ? 0.05 : 0)).toFixed(3),
   );
@@ -218,6 +238,8 @@ export const hotels = Array.from({ length: 100 }, (_, index) => {
   };
 });
 
+// Called by: HomePage (section điểm đến phổ biến).
+// Output: mảng destination card data.
 export const destinations = [
   {
     name: "TP.HCM",
@@ -251,7 +273,8 @@ export const destinations = [
   },
 ];
 
-// Số liệu hiển thị ở AboutPage.
+// Called by: AboutPage.
+// Output: mảng số liệu KPI hiển thị.
 export const stats = [
   { number: "500K+", label: "Khách sạn toàn cầu" },
   { number: "2M+", label: "Khách hàng tin dùng" },
@@ -259,6 +282,8 @@ export const stats = [
   { number: "24/7", label: "Hỗ trợ khách hàng" },
 ];
 
+// Called by: AboutPage.
+// Output: mảng giá trị cốt lõi hiển thị theo card.
 export const values = [
   {
     icon: "🏆",
@@ -282,7 +307,8 @@ export const values = [
   },
 ];
 
-// Thông tin liên hệ hiển thị ở ContactPage.
+// Called by: ContactPage.
+// Output: mảng thông tin liên hệ cho cột thông tin.
 export const contactInfo = [
   {
     icon: "📍",

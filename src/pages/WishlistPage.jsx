@@ -2,16 +2,20 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { hotels } from "../data";
 import HotelCard from "../components/HotelCard";
+import { useUser } from "../context/userContext";
 
-export default function WishlistPage({
-    currentUser,
-    wishlistHotelIds = [],
-    onToggleWishlist = () => { },
-}) {
+// Called by: route "/wishlist".
+// Params: không nhận props; đọc currentUser, wishlistHotelIds, onToggleWishlist từ useUser().
+// Output: danh sách khách sạn yêu thích của user hiện tại.
+// Does: chặn người dùng chưa login và render trạng thái empty/list theo dữ liệu.
+export default function WishlistPage() {
+    const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
+    // Does: chuyển number[] -> Set<number> để tra cứu has(id) O(1).
     const wishlistSet = useMemo(
         () => new Set(wishlistHotelIds),
         [wishlistHotelIds],
     );
+    // Does: join dữ liệu id yêu thích với mảng hotels để lấy object đầy đủ.
     const wishlistHotels = useMemo(
         () => hotels.filter((hotel) => wishlistSet.has(hotel.id)),
         [wishlistSet],
@@ -55,7 +59,7 @@ export default function WishlistPage({
                 <div className="section-inner">
                     {wishlistHotels.length === 0 ? (
                         <div className="wishlist-empty">
-                            <h2 className="section-title">Wishlist đang trống</h2>
+                            <h2 className="section-title">Danh sách yêu thích đang trống</h2>
                             <p>Bạn chưa thêm khách sạn nào vào danh sách yêu thích.</p>
                             <Link to="/hotels" className="book-btn wishlist-browse-link">
                                 Khám phá khách sạn

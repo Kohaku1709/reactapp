@@ -1,25 +1,48 @@
 import { useState } from "react";
 import { contactInfo } from "../data";
+import { useUser } from "../context/userContext";
 
+// Called by: route "/contact".
+// Params: không nhận props; đọc currentUser từ useUser().
+// Output: trang liên hệ + form gửi + trạng thái gửi thành công.
+// Does: gom dữ liệu liên hệ và validate tối thiểu trước khi set sent=true.
 export default function ContactPage() {
-  // Gom các field vào một object state để handleChange dùng chung cho nhiều input.
+  const { currentUser } = useUser();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  // sent = true sẽ chuyển giao diện từ form sang trạng thái gửi thành công.
   const [sent, setSent] = useState(false);
 
-  // Cập nhật theo name của input, giúp tái sử dụng 1 hàm cho toàn bộ field.
+  // Called by: onChange của input/select/textarea.
+  // Params: event từ field có name thuộc {name,email,subject,message}.
+  // Output: form state mới với đúng field vừa thay đổi.
+  // Does: dùng computed property [e.target.name] để tái sử dụng 1 handler cho nhiều field.
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Called by: click nút "Gửi tin nhắn".
+  // Params: không có trực tiếp; dùng currentUser + form state.
+  // Accepted values:
+  // - currentUser: null hoặc { name, email }
+  // - form.message: chuỗi không rỗng
+  // Output: sent=true nếu đủ dữ liệu, ngược lại return sớm.
+  // Does: thống nhất luồng gửi cho cả user đã login và guest.
   const handleSubmit = () => {
-    // Validate tối thiểu cho demo: bắt buộc tên, email, tin nhắn.
-    if (!form.name || !form.email || !form.message) return;
+    // Nếu đã đăng nhập thì ưu tiên lấy dữ liệu profile, chưa login thì fallback về form.
+    // currentUser?.name:
+    // - nếu currentUser tồn tại -> lấy name
+    // - nếu currentUser là null/undefined -> trả về undefined (không throw lỗi)
+    // currentUser?.name ?? form.name:
+    // - nếu vế trái null/undefined -> dùng form.name
+    // - nếu vế trái có giá trị hợp lệ -> giữ vế trái
+    const senderName = currentUser?.name ?? form.name;
+    const senderEmail = currentUser?.email ?? form.email;
+
+    if (!senderName || !senderEmail || !form.message) return;
     setSent(true);
   };
 
   return (
     <div className="app page-with-header-offset">
 
-      {/* PAGE HERO */}
+
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Liên hệ với chúng tôi</h1>
@@ -31,14 +54,14 @@ export default function ContactPage() {
         <div className="section-inner">
           <div className="contact-layout">
 
-            {/* CONTACT INFO */}
+
             <div className="contact-info-col">
               <h2 className="section-title contact-info-title">Thông tin liên hệ</h2>
               <p className="contact-info-subtext">
                 Hãy liên hệ với chúng tôi qua bất kỳ kênh nào bên dưới hoặc gửi tin nhắn trực tiếp.
               </p>
               <div className="contact-cards">
-                {/* map dữ liệu contact từ data.js để dễ chỉnh sửa nội dung. */}
+
                 {contactInfo.map((c) => (
                   <div key={c.title} className="contact-card">
                     <div className="contact-card-icon">{c.icon}</div>
@@ -60,9 +83,9 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* CONTACT FORM */}
+
             <div className="contact-form-col">
-              {/* Render có điều kiện: sent=true thì hiện màn thành công, ngược lại hiện form. */}
+
               {sent ? (
                 <div className="form-success">
                   <div className="success-icon">✅</div>
@@ -75,16 +98,16 @@ export default function ContactPage() {
               ) : (
                 <div className="contact-form">
                   <h3 className="form-title">Gửi tin nhắn</h3>
-                  <div className="form-row">
+                  {!currentUser && (<div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Họ và tên *</label>
-                      <input className="form-input" name="name" value={form.name} onChange={handleChange} placeholder="Nguyễn Văn A" />
+                      <input className="form-input" name="name" value={form.name} onChange={handleChange} placeholder="Nguyễn Văn Hậu" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Email *</label>
-                      <input className="form-input" name="email" type="email" value={form.email} onChange={handleChange} placeholder="email@example.com" />
+                      <input className="form-input" name="email" type="email" value={form.email} onChange={handleChange} placeholder="n23dccn018@students.ptit.edu.vn" />
                     </div>
-                  </div>
+                  </div>)}
                   <div className="form-group">
                     <label className="form-label">Chủ đề</label>
                     <select className="form-input" name="subject" value={form.subject} onChange={handleChange}>
