@@ -1,73 +1,57 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { hotels } from "../data";
 import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
-import useHotelListing from "../hooks/useHotelListing";
 import HotelCard from "../components/HotelCard";
 import { useUser } from "../context/userContext";
-import {
-  HOTEL_FILTERS,
-  HOTEL_SORT_DEFAULT,
-  HOTEL_SORT_OPTIONS,
-  HOTEL_FILTER_DEFAULTS,
-  matchesDestination,
-} from "../utils/hotelQuery";
+import { hotelAPI } from "../services/api";
+import { HOTEL_FILTERS, HOTEL_SORT_DEFAULT, HOTEL_SORT_OPTIONS } from "../utils/hotelQuery";
 
-// Called by: route "/hotels" trong App.
-// Params: không nhận props; dùng state/action từ useUser().
-// Output: danh sách khách sạn có filter, sort, lọc địa chỉ, load-more.
-// Does: là trang listing chính sau khi người dùng tìm kiếm từ HomePage.
 export default function HotelsPage() {
   const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
-  // routeLocation.state?.searchAddress nhận dữ liệu do HomePage gửi qua navigate.
   const routeLocation = useLocation();
-  const initialSearchAddress = routeLocation.state?.searchAddress;
+  const initialSearch = routeLocation.state?.searchAddress || "";
+
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
-  const [addressQuery, setAddressQuery] = useState(
-    typeof initialSearchAddress === "string" ? initialSearchAddress.trim() : "",
-  );
-  const [visibleRows, setVisibleRows] = useState(4);
+  const [addressQuery, setAddressQuery] = useState(typeof initialSearch === "string" ? initialSearch.trim() : "");
+  const [visibleCount, setVisibleCount] = useState(12);
   const gridColumns = useResponsiveGridColumns();
-  const filters = HOTEL_FILTERS;
-  const isWishlistEnabled = Boolean(currentUser);
-  const wishlistSet = useMemo(
-    () => new Set(wishlistHotelIds),
-    [wishlistHotelIds],
-  );
-  // addressFilter: hàm filter phụ truyền cho useHotelListing.
-  const addressFilter = useMemo(
-    () => (hotel) => matchesDestination(hotel.location, addressQuery),
-    [addressQuery],
-  );
 
-  // Does: đồng bộ input địa chỉ khi state của route thay đổi.
+  const isWishlistEnabled = Boolean(currentUser);
+  const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
+
+  // Fetch từ API mỗi khi filter/sort thay đổi
+  const fetchHotels = useCallback(() => {
+    setLoading(true);
+    setError("");
+    hotelAPI.getAll({ filter: activeFilter, sort: sortBy, search: addressQuery, limit: 100 })
+      .then((res) => {
+        if (res.success) setHotels(res.data);
+        else setError("Không tải được danh sách khách sạn.");
+      })
+      .catch(() => setError("Không kết nối được server."))
+      .finally(() => setLoading(false));
+  }, [activeFilter, sortBy, addressQuery]);
+
+  useEffect(() => { fetchHotels(); }, [fetchHotels]);
+
+  // Reset visible khi filter thay đổi
+  useEffect(() => { setVisibleCount(12); }, [activeFilter, sortBy, addressQuery]);
+
+  // Sync địa chỉ từ route state (navigate từ HomePage)
   useEffect(() => {
-    const searchAddress = routeLocation.state?.searchAddress;
-    if (typeof searchAddress === "string") {
-      setAddressQuery(searchAddress.trim());
-    }
+    const s = routeLocation.state?.searchAddress;
+    if (typeof s === "string") setAddressQuery(s.trim());
   }, [routeLocation.state]);
 
-  // Does: dùng pipeline chung filter -> sort -> paginate để đảm bảo hành vi nhất quán.
-  const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
-    hotelList: hotels,
-    activeFilter,
-    sortBy,
-    visibleRows,
-    gridColumns,
-    filterOptions: HOTEL_FILTER_DEFAULTS,
-    extraFilter: addressFilter,
-  });
-
-  // Does: reset visibleRows khi đổi filter/sort/address.
-  useEffect(() => {
-    setVisibleRows(4);
-  }, [activeFilter, sortBy, addressQuery]);
+  const visibleHotels = hotels.slice(0, visibleCount);
+  const hasMore = visibleCount < hotels.length;
 
   return (
     <div className="app page-with-header-offset">
-
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Tất cả khách sạn</h1>
@@ -79,15 +63,17 @@ export default function HotelsPage() {
         <div className="section-inner">
           <div className="hotels-toolbar">
             <div className="filter-bar">
-              {filters.map((f) => (
-                <button key={f} className={`filter-btn ${activeFilter === f ? "active" : ""}`} onClick={() => setActiveFilter(f)}>{f}</button>
+              {HOTEL_FILTERS.map((f) => (
+                <button key={f}
+                  className={`filter-btn ${activeFilter === f ? "active" : ""}`}
+                  onClick={() => setActiveFilter(f)}>{f}</button>
               ))}
             </div>
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
               <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                {HOTEL_SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                {HOTEL_SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </div>
@@ -98,42 +84,51 @@ export default function HotelsPage() {
             <input
               className="address-filter-input"
               value={addressQuery}
-              onChange={(event) => setAddressQuery(event.target.value)}
+              onChange={(e) => setAddressQuery(e.target.value)}
               placeholder="Lọc nhanh theo địa chỉ..."
             />
             {addressQuery && (
-              <button
-                className="address-clear-btn"
-                type="button"
-                onClick={() => setAddressQuery("")}
-              >
+              <button className="address-clear-btn" type="button" onClick={() => setAddressQuery("")}>
                 Xóa
               </button>
             )}
           </div>
 
           <div className="section-header hotels-result-header">
-            <span className="result-count">{filteredHotels.length} khách sạn được tìm thấy</span>
+            <span className="result-count">
+              {loading ? "Đang tải..." : `${hotels.length} khách sạn được tìm thấy`}
+            </span>
           </div>
 
-          <div className="hotels-grid">
-            {visibleHotels.map((hotel) => (
-              <HotelCard
-                key={hotel.id}
-                hotel={hotel}
-                interactiveWishlist={isWishlistEnabled}
-                isWishlisted={wishlistSet.has(hotel.id)}
-                onWishlistToggle={onToggleWishlist}
-              />
-            ))}
-          </div>
+          {error && <p style={{ color: "red", textAlign: "center", padding: "1rem" }}>{error}</p>}
 
-          {hasMoreHotels && (
-            <div className="load-more-wrap">
-              <button className="load-more-btn" onClick={() => setVisibleRows((prev) => prev + 4)}>
-                Xem thêm
-              </button>
+          {loading ? (
+            <div className="loading-wrap">
+              <div className="loading-spinner" />
+              <p>Đang tải khách sạn...</p>
             </div>
+          ) : (
+            <>
+              <div className="hotels-grid">
+                {visibleHotels.map((hotel) => (
+                  <HotelCard
+                    key={hotel.id}
+                    hotel={hotel}
+                    interactiveWishlist={isWishlistEnabled}
+                    isWishlisted={wishlistSet.has(hotel.id)}
+                    onWishlistToggle={onToggleWishlist}
+                  />
+                ))}
+              </div>
+              {hasMore && (
+                <div className="load-more-wrap">
+                  <button className="load-more-btn"
+                    onClick={() => setVisibleCount((p) => p + 12 * gridColumns)}>
+                    Xem thêm
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
