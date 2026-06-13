@@ -1,0 +1,74 @@
+warning: in the working copy of 'src/App.jsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/App.jsx b/src/App.jsx[m
+[1mindex 3dd59f7..fe4319b 100644[m
+[1m--- a/src/App.jsx[m
+[1m+++ b/src/App.jsx[m
+[36m@@ -3,6 +3,7 @@[m [mimport { BrowserRouter, Routes, Route } from "react-router-dom";[m
+ import Navbar from "./components/Navbar";[m
+ import Footer from "./components/Footer";[m
+ import { UserProvider } from "./context/userContext";[m
+[32m+[m[32mimport { HotelProvider } from "./context/hotelContext";[m
+ import "./App.css";[m
+ [m
+ const HomePage = lazy(() => import("./pages/HomePage"));[m
+[36m@@ -10,6 +11,7 @@[m [mconst AboutPage = lazy(() => import("./pages/AboutPage"));[m
+ const HotelsPage = lazy(() => import("./pages/HotelsPage"));[m
+ const ContactPage = lazy(() => import("./pages/ContactPage"));[m
+ const LoginPage = lazy(() => import("./pages/LoginPage"));[m
+[32m+[m[32mconst BookHotels = lazy(() => import("./pages/BookHotels"));[m
+ const WishlistPage = lazy(() => import("./pages/WishlistPage"));[m
+ [m
+ const AUTH_STORAGE_KEY = "stayhtm_auth_user";[m
+[36m@@ -38,6 +40,18 @@[m [mexport default function App() {[m
+   });[m
+   // wishlistHotelIds: mảng số nguyên dương (id khách sạn) của user hiện tại.[m
+   const [wishlistHotelIds, setWishlistHotelIds] = useState([]);[m
+[32m+[m[41m  [m
+[32m+[m[32m  const [selectedHotel, setSelectedHotel] = useState(null);[m
+[32m+[m[32m  const [startDay, setStartDay] = useState(null);[m
+[32m+[m[32m  const [endDay, setEndDay] = useState(null);[m
+[32m+[m[32m  const [location, setLocation] = useState("");[m
+[32m+[m
+[32m+[m[32m  const handleSelectHotel = useCallback((hotel, bookingInfo = {}) => {[m
+[32m+[m[32m    setSelectedHotel(hotel);[m
+[32m+[m[32m    setLocation(bookingInfo.location ?? "");[m
+[32m+[m[32m    setStartDay(bookingInfo.startDay ?? "");[m
+[32m+[m[32m    setEndDay(bookingInfo.endDay ?? "");[m
+[32m+[m[32m  }, []);[m
+ [m
+   // Does: đồng bộ currentUser vào localStorage, null thì xóa session auth.[m
+   useEffect(() => {[m
+[36m@@ -146,6 +160,17 @@[m [mexport default function App() {[m
+       onLogout={handleLogout}[m
+       onToggleWishlist={handleToggleWishlist}[m
+     >[m
+[32m+[m
+[32m+[m[32m      <HotelProvider[m
+[32m+[m[32m        selectedHotel={selectedHotel}[m
+[32m+[m[32m        startDay={startDay}[m
+[32m+[m[32m        endDay={endDay}[m
+[32m+[m[32m        location={location}[m
+[32m+[m[32m        onSelectHotel={handleSelectHotel}[m
+[32m+[m[32m        onSetStartDay={setStartDay}[m
+[32m+[m[32m        onSetEndDay={setEndDay}[m
+[32m+[m[32m        onSetLocation={setLocation}[m
+[32m+[m[32m      >[m
+       <BrowserRouter>[m
+         <Navbar />[m
+         <Suspense fallback={<div className="route-loading">Đang tải trang...</div>}>[m
+[36m@@ -154,6 +179,7 @@[m [mexport default function App() {[m
+             <Route path="/" element={<HomePage />} />[m
+             <Route path="/hotels" element={<HotelsPage />} />[m
+             <Route path="/wishlist" element={<WishlistPage />} />[m
+[32m+[m[32m            <Route path="/bookings" element={<BookHotels />} />[m
+             <Route path="/about-us" element={<AboutPage />} />[m
+             <Route path="/contact" element={<ContactPage />} />[m
+ [m
+[36m@@ -168,6 +194,7 @@[m [mexport default function App() {[m
+           </button>[m
+         )}[m
+       </BrowserRouter>[m
+[32m+[m[32m      </HotelProvider>[m
+     </UserProvider>[m
+   );[m
+ }[m

@@ -4,8 +4,10 @@
 // Output: số thực trong khoảng [0,1] đại diện tỷ lệ giảm.
 // Does: chuẩn hóa công thức giảm giá dùng chung toàn app.
 export const getDiscountRate = (hotel) => {
-  if (!hotel.originalPrice || hotel.originalPrice <= 0) return 0;
-  return 1 - hotel.price / hotel.originalPrice;
+  const price = hotel.price ?? 0;
+  const originalPrice = hotel.originalPrice ?? hotel.original_price;
+  if (!originalPrice || originalPrice <= 0) return 0;
+  return 1 - price / originalPrice;
 };
 
 // Called by: HotelCard khi render badge "-x%".
