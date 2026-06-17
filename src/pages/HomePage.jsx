@@ -15,18 +15,18 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   // State lưu trữ dữ liệu từ API
-  const [hotels, setHotels]           = useState([]);       // Mảng chứa các khách sạn nổi bật
+  const [hotels, setHotels] = useState([]);       // Mảng chứa các khách sạn nổi bật
   const [destinations, setDestinations] = useState([]);   // Mảng chứa danh sách các điểm đến phổ biến
   const [loadingHotels, setLoadingHotels] = useState(true); // Trạng thái chờ tải dữ liệu khách sạn
 
   // State lưu trữ lựa chọn tìm kiếm của người dùng
   const [destination, setDestination] = useState("");
-  const [checkin, setCheckin]         = useState(null);
-  const [checkout, setCheckout]       = useState(null);
-  
+  const [checkin, setCheckin] = useState(null);
+  const [checkout, setCheckout] = useState(null);
+
   // State quản lý bộ lọc hoạt động và kiểu sắp xếp của danh sách khách sạn hiển thị ở trang chủ
   const [activeFilter, setActiveFilter] = useState("Tất cả");
-  const [sortBy, setSortBy]           = useState(HOTEL_SORT_DEFAULT);
+  const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
   const [visibleRows, setVisibleRows] = useState(4); // Số hàng khách sạn hiển thị ban đầu
   const gridColumns = useResponsiveGridColumns(); // Hook tính số cột grid responsive
 
@@ -38,7 +38,7 @@ export default function HomePage() {
   useEffect(() => {
     hotelAPI.getFeatured()
       .then((res) => { if (res.success) setHotels(res.data); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingHotels(false));
   }, []);
 
@@ -46,7 +46,7 @@ export default function HomePage() {
   useEffect(() => {
     locationAPI.getAll()
       .then((res) => { if (res.success) setDestinations(res.data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Tự động gom các địa chỉ khách sạn và tên điểm đến để tạo gợi ý nhập liệu (Datalist suggestions)
@@ -60,6 +60,13 @@ export default function HomePage() {
   const handleSearch = (event) => {
     event?.preventDefault();
     navigate("/hotels", { state: { searchAddress: destination.trim() } });
+  };
+
+  // Xử lý khi click vào nút "Xem thêm" ở phần khách sạn nổi bật, chuyển hướng sang trang /hotels với bộ lọc và sắp xếp tương ứng
+  // nếu không có lọc thì chỉ chuyển hướng bình thường, nếu có lọc thì sẽ reset số lượng hiển thị về 4 để tránh tình trạng hiển thị quá nhiều khách sạn cùng lúc
+  const handleViewMore = () => {
+    navigate("/hotels", { state: { searchAddress: destination.trim(), filter: activeFilter, sort: sortBy } });
+    setVisibleRows(4);
   };
 
   // Xử lý khi click vào Card điểm đến, chuyển hướng nhanh sang trang tìm kiếm theo điểm đến đó
@@ -89,7 +96,7 @@ export default function HomePage() {
           <p className="hero-eyebrow">Ưu đãi lên đến 40% · Hơn 500,000 khách sạn toàn cầu</p>
           <h1 className="hero-title">Tìm chỗ nghỉ <span className="hero-highlight">hoàn hảo</span> của bạn</h1>
           <p className="hero-sub">Đặt phòng nhanh chóng, giá tốt nhất, không phí ẩn</p>
-          
+
           {/* Hộp tìm kiếm khách sạn */}
           <form className="search-box" onSubmit={handleSearch}>
             {/* Trường nhập địa điểm */}
@@ -110,7 +117,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="search-divider" />
-            
+
             {/* Trường chọn ngày nhận phòng */}
             <div className="search-field">
               <span className="field-icon">📅</span>
@@ -121,7 +128,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="search-divider" />
-            
+
             {/* Trường chọn ngày trả phòng */}
             <div className="search-field">
               <span className="field-icon">📅</span>
@@ -131,7 +138,7 @@ export default function HomePage() {
                   dateFormat="dd/MM/yyyy" placeholderText="Chọn ngày" minDate={checkin || new Date()} />
               </div>
             </div>
-            
+
             {/* Nút gửi tìm kiếm */}
             <button type="submit" className="search-btn">🔍 Tìm kiếm</button>
           </form>
@@ -167,7 +174,7 @@ export default function HomePage() {
             <h2 className="section-title">Khách sạn nổi bật</h2>
             <span className="result-count">{filteredHotels.length} khách sạn</span>
           </div>
-          
+
           {/* Thanh Toolbar lọc & sắp xếp */}
           <div className="hotels-toolbar">
             {/* Nút lọc nhanh theo danh mục */}
@@ -178,7 +185,7 @@ export default function HomePage() {
                   onClick={() => { setActiveFilter(f); setVisibleRows(4); }}>{f}</button>
               ))}
             </div>
-            
+
             {/* Dropdown sắp xếp */}
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
@@ -198,17 +205,18 @@ export default function HomePage() {
               <div className="hotels-grid">
                 {visibleHotels.map((hotel) => (
                   <HotelCard key={hotel.id} hotel={hotel}
+                    // isBooked={bookedSet.has(Number(hotel.id))} // Đã hoàn tác
                     interactiveWishlist={isWishlistEnabled}
                     isWishlisted={wishlistSet.has(hotel.id)}
                     onWishlistToggle={onToggleWishlist}
                   />
                 ))}
               </div>
-              
+
               {/* Nút xem thêm khách sạn */}
               {hasMoreHotels && (
                 <div className="load-more-wrap">
-                  <button className="load-more-btn" onClick={() => setVisibleRows((p) => p + 4)}>
+                  <button className="load-more-btn" onClick={() => handleViewMore()}>
                     Xem thêm
                   </button>
                 </div>

@@ -5,8 +5,8 @@ import BookingModal from "./BookingModal";
 import { getDiscountPercent } from "../utils/hotelPricing";
 import { useUser } from "../context/userContext";
 
-// Component card thông tin khách sạn đơn lẻ hiển thị trên grid
-function HotelCard({ hotel, interactiveWishlist = false, isWishlisted = false, onWishlistToggle }) {
+// Component card thông tin khách sạn đơn lẻ hiển thị trên grid (isBooked = false đã được hoàn tác)
+function HotelCard({ hotel, isBooked = false, interactiveWishlist = false, isWishlisted = false, onWishlistToggle }) {
   const { currentUser } = useUser();
   const navigate = useNavigate();
   // State quản lý việc hiển thị Modal đặt phòng
@@ -82,7 +82,7 @@ function HotelCard({ hotel, interactiveWishlist = false, isWishlisted = false, o
               <div className="current-price">
                 {Number(hotel.price).toLocaleString("vi-VN")}₫
                 <span className="per-night">/đêm</span>
-              </div>
+                </div> 
             </div>
             <button className="book-btn" onClick={handleBookClick}>
               {currentUser ? "Đặt phòng" : "Xem phòng"}

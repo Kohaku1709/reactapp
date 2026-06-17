@@ -5,10 +5,10 @@ import { bookingAPI } from "../services/api";
 
 // Cấu hình các nhãn hiển thị trạng thái đơn đặt phòng tương ứng với mã màu CSS
 const STATUS_LABEL = {
-  pending:   { text: "Chờ xác nhận", color: "#f59e0b" },
-  confirmed: { text: "Đã xác nhận",  color: "#10b981" },
-  cancelled: { text: "Đã hủy",       color: "#ef4444" },
-  completed: { text: "Hoàn thành",   color: "#6366f1" },
+  pending: { text: "Chờ xác nhận", color: "#f59e0b" },
+  confirmed: { text: "Đã xác nhận", color: "#10b981" },
+  cancelled: { text: "Đã hủy", color: "#ef4444" },
+  completed: { text: "Hoàn thành", color: "#6366f1" },
 };
 
 // Hàm định dạng hiển thị ngày tháng sang kiểu Việt Nam (DD/MM/YYYY)
@@ -18,9 +18,9 @@ const fmtPrice = (p) => Number(p).toLocaleString("vi-VN") + "₫";
 
 // Component Lịch sử Đặt phòng (Bookings Page)
 export default function BookingsPage() {
-  const { currentUser } = useUser();
+  const { currentUser } = useUser(); // Đã hoàn tác việc lấy setBookedHotelIds từ Context
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null); // Lưu trữ ID đơn đang gửi yêu cầu hủy lên server
 
   // Lấy lịch sử đặt phòng của user từ API sau khi mount component
@@ -28,7 +28,7 @@ export default function BookingsPage() {
     if (!currentUser) return;
     bookingAPI.getAll()
       .then((res) => { if (res.success) setBookings(res.data); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [currentUser]);
 
@@ -45,6 +45,12 @@ export default function BookingsPage() {
       setBookings((prev) =>
         prev.map((b) => b.id === id ? { ...b, status: "cancelled" } : b)
       );
+      // Cập nhật Global State: Xóa hotel_id của đơn đặt phòng vừa hủy // Đã hoàn tác
+      // const cancelledBookingID = bookings.find(b => b.id === id); // Đã hoàn tác
+      // if (cancelledBookingID && setBookedHotelIds) { // Đã hoàn tác
+      //   // Đảm bảo ID là kiểu Number để so khớp chính xác // Đã hoàn tác
+      //   setBookedHotelIds(prevIds => prevIds.filter(hotelId => hotelId !== Number(cancelledBooking.hotel_id))); // Đã hoàn tác
+      // }
     } else {
       alert(res.message || "Hủy thất bại.");
     }
