@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom";
 import { stats, values } from "../data"
 
-// Called by: route "/about-us".
-// Params: không có.
-// Output: trang giới thiệu thương hiệu, số liệu và giá trị cốt lõi.
-// Does: render nội dung tĩnh từ data.js bằng các section layout.
+// Component Trang giới thiệu (About Page)
+// Hiển thị thông tin tĩnh về doanh nghiệp, số liệu thống kê và giá trị cốt lõi
 export default function AboutPage() {
   return (
     <div className="app page-with-header-offset">
 
-
+      {/* Banner trang trí đầu trang */}
       <div className="page-hero about-hero">
         <div className="page-hero-inner">
           <p className="hero-eyebrow">Câu chuyện của chúng tôi</p>
@@ -18,7 +16,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-
+      {/* Khối nội dung giới thiệu chi tiết */}
       <section className="section section-white">
         <div className="section-inner about-story">
           <div className="about-text">
@@ -36,11 +34,10 @@ export default function AboutPage() {
         </div>
       </section>
 
-
+      {/* Khối hiển thị các số liệu thống kê nổi bật (stats từ data.js) */}
       <section className="section section-brand-compact">
         <div className="section-inner">
           <div className="stats-grid">
-
             {stats.map((s) => (
               <div key={s.label} className="stat-card">
                 <div className="stat-number">{s.number}</div>
@@ -51,14 +48,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-
+      {/* Khối hiển thị các giá trị cốt lõi (values từ data.js) */}
       <section className="section section-surface">
         <div className="section-inner">
           <div className="section-header section-header-centered">
             <h2 className="section-title section-title-centered">Giá trị cốt lõi</h2>
           </div>
           <div className="values-grid">
-
             {values.map((v) => (
               <div key={v.title} className="value-card">
                 <div className="value-icon">{v.icon}</div>
@@ -70,7 +66,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-
+      {/* Khối CTA kêu gọi hành động cuối trang */}
       <section className="about-cta">
         <h2>Sẵn sàng khám phá Việt Nam cùng StayHTM?</h2>
         <p>Hàng ngàn khách sạn đang chờ bạn với mức giá tốt nhất</p>

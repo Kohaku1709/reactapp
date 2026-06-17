@@ -1,10 +1,14 @@
+// URL gốc của backend API
 const BASE = "http://localhost:3001/api";
 
+// Các hàm tương tác với LocalStorage để lưu và quản lý JWT Token đăng nhập
 export const getToken = () => localStorage.getItem("stayhtm_token");
 export const setToken = (t) => localStorage.setItem("stayhtm_token", t);
 export const removeToken = () => localStorage.removeItem("stayhtm_token");
 
-// Helper fetch dùng chung — tự gắn Authorization header nếu có token
+// Hàm fetch dữ liệu dùng chung (Wrapper)
+// - Tự động thiết lập header Content-Type là application/json
+// - Tự động đính kèm Token xác thực "Authorization: Bearer <token>" nếu có token trong LocalStorage
 export const apiFetch = async (path, options = {}) => {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
@@ -17,31 +21,36 @@ export const apiFetch = async (path, options = {}) => {
   return res.json();
 };
 
-// ─── Auth ──────────────────────────────────────────────────────────────────────
+// ─── Các API Auth (Xác thực người dùng) ───────────────────────────────────────────
 export const authAPI = {
+  // Đăng nhập tài khoản
   login: (email, password) =>
     apiFetch("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     }),
 
+  // Đăng ký tài khoản mới
   register: (email, password, name) =>
     apiFetch("/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     }),
 
+  // Lấy thông tin cá nhân của user đang đăng nhập (dùng token)
   getMe: () => apiFetch("/auth/me"),
 
-  updateMe: (name) =>
+  // Cập nhật thông tin cá nhân (tên hiển thị hoặc đổi mật khẩu)
+  updateMe: (payload) =>
     apiFetch("/auth/me", {
       method: "PUT",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(payload),
     }),
 };
 
-// ─── Hotels ───────────────────────────────────────────────────────────────────
+// ─── Các API Hotels (Quản lý khách sạn) ──────────────────────────────────────────
 export const hotelAPI = {
+  // Lấy danh sách khách sạn kèm theo các tham số lọc, tìm kiếm, sắp xếp và phân trang
   getAll: (params = {}) => {
     const qs = new URLSearchParams();
     if (params.sort)        qs.set("sort",      params.sort);
@@ -54,43 +63,54 @@ export const hotelAPI = {
     return apiFetch(`/hotels?${qs}`);
   },
 
+  // Lấy thông tin chi tiết của 1 khách sạn theo ID
   getById: (id) => apiFetch(`/hotels/${id}`),
 
+  // Lấy danh sách khách sạn nổi bật (featured)
   getFeatured: () => apiFetch("/hotels/featured"),
 };
 
-// ─── Wishlist ─────────────────────────────────────────────────────────────────
+// ─── Các API Wishlist (Danh sách yêu thích) ──────────────────────────────────────
 export const wishlistAPI = {
+  // Lấy toàn bộ danh sách khách sạn yêu thích của user hiện tại
   getAll: () => apiFetch("/wishlist"),
 
+  // Bật/tắt trạng thái yêu thích của 1 khách sạn (Thêm nếu chưa có, xóa nếu đã có)
   toggle: (hotelId) =>
     apiFetch(`/wishlist/${hotelId}/toggle`, { method: "POST" }),
 
+  // Thêm trực tiếp 1 khách sạn vào danh sách yêu thích
   add: (hotelId) =>
     apiFetch(`/wishlist/${hotelId}`, { method: "POST" }),
 
+  // Xóa trực tiếp 1 khách sạn khỏi danh sách yêu thích
   remove: (hotelId) =>
     apiFetch(`/wishlist/${hotelId}`, { method: "DELETE" }),
 };
 
-// ─── Bookings ─────────────────────────────────────────────────────────────────
+// ─── Các API Bookings (Đặt phòng) ────────────────────────────────────────────────
 export const bookingAPI = {
+  // Lấy toàn bộ lịch sử các đơn đặt phòng của user
   getAll: () => apiFetch("/bookings"),
 
+  // Tạo một đơn đặt phòng khách sạn mới
   create: (payload) =>
     apiFetch("/bookings", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
+  // Lấy chi tiết thông tin đơn đặt phòng theo ID đơn
   getById: (id) => apiFetch(`/bookings/${id}`),
 
+  // Hủy đơn đặt phòng (chỉ cho phép khi đơn ở trạng thái chờ/đã xác nhận chưa nhận phòng)
   cancel: (id) =>
     apiFetch(`/bookings/${id}/cancel`, { method: "PATCH" }),
 };
 
-// ─── Contact ──────────────────────────────────────────────────────────────────
+// ─── API Contact (Gửi liên hệ hỗ trợ) ─────────────────────────────────────────────
 export const contactAPI = {
+  // Gửi thông tin liên hệ/góp ý của khách hàng lên hệ thống
   send: (payload) =>
     apiFetch("/contact", {
       method: "POST",
@@ -98,7 +118,46 @@ export const contactAPI = {
     }),
 };
 
-// ─── Locations ────────────────────────────────────────────────────────────────
+// ─── API Locations (Lấy danh sách điểm đến phổ biến) ─────────────────────────────────
 export const locationAPI = {
+  // Lấy danh sách các tỉnh/thành phố du lịch nổi bật hiển thị ở trang chủ
   getAll: () => apiFetch("/locations"),
+};
+
+// ─── API Admin (Quản trị hệ thống) ──────────────────────────────────────────────────
+export const adminAPI = {
+  // Lấy toàn bộ đơn đặt phòng
+  getBookings: () => apiFetch("/admin/bookings"),
+
+  // Cập nhật trạng thái đơn hàng (duyệt/hủy/hoàn thành)
+  updateBookingStatus: (id, status) =>
+    apiFetch(`/admin/bookings/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  // Lấy toàn bộ tin nhắn liên hệ gửi lên
+  getContacts: () => apiFetch("/admin/contacts"),
+
+  // Đánh dấu tin nhắn liên hệ đã đọc
+  markContactRead: (id) =>
+    apiFetch(`/admin/contacts/${id}/read`, { method: "PATCH" }),
+
+  // Tạo khách sạn mới
+  createHotel: (payload) =>
+    apiFetch("/admin/hotels", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // Cập nhật thông tin khách sạn
+  updateHotel: (id, payload) =>
+    apiFetch(`/admin/hotels/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  // Xóa khách sạn khỏi hệ thống
+  deleteHotel: (id) =>
+    apiFetch(`/admin/hotels/${id}`, { method: "DELETE" }),
 };

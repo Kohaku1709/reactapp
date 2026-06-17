@@ -1,20 +1,19 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-// Called by: useResponsiveGridColumns và handleResize.
-// Params: width. Accepted values: số pixel >= 0.
-// Output: số cột grid 1|2|3.
-// Does: map kích thước màn hình sang mật độ hiển thị card.
+// Hàm ánh xạ từ chiều rộng màn hình (pixels) sang số cột hiển thị tương ứng
+// - Dưới 768px (Mobile): Hiển thị 1 cột (dọc)
+// - Từ 768px đến 1024px (Tablet): Hiển thị 2 cột
+// - Trên 1024px (Desktop): Hiển thị 3 cột
 const getGridColumnsByWidth = (width) => {
   if (width <= 768) return 1;
   if (width <= 1024) return 2;
   return 3;
 };
 
-// Called by: HomePage/HotelsPage.
-// Params: không có.
-// Output: gridColumns hiện tại (1|2|3).
-// Does: lắng nghe resize và cập nhật số cột khi breakpoint thay đổi.
+// Custom Hook theo dõi sự thay đổi kích thước của cửa sổ trình duyệt (window resize)
+// Giúp layout lưới của khách sạn co giãn mượt mà và trực quan (Responsive)
 export default function useResponsiveGridColumns() {
+  // Khởi tạo số cột ban đầu dựa trên chiều rộng hiện tại của trình duyệt
   const [gridColumns, setGridColumns] = useState(() =>
     typeof window === "undefined"
       ? 3
@@ -22,20 +21,20 @@ export default function useResponsiveGridColumns() {
   );
 
   useEffect(() => {
-    // Called by: browser resize event + lần gọi thủ công sau khi mount.
-    // Params: không dùng trực tiếp event object.
-    // Output: state gridColumns mới nếu breakpoint thay đổi.
-    // Does: tránh setState dư thừa khi số cột không đổi.
+    // Hàm callback chạy mỗi khi người dùng resize trình duyệt
     const handleResize = () => {
       const nextColumns = getGridColumnsByWidth(window.innerWidth);
+      // Chỉ cập nhật state nếu số cột thực sự thay đổi (tránh re-render thừa)
       setGridColumns((prevColumns) =>
         prevColumns === nextColumns ? prevColumns : nextColumns,
       );
     };
 
+    // Lắng nghe sự kiện resize với tùy chọn passive để tăng hiệu suất cuộn/vẽ
     window.addEventListener("resize", handleResize, { passive: true });
-    handleResize();
+    handleResize(); // Chạy thử 1 lần ngay sau khi mount để đảm bảo kích thước chính xác
 
+    // Hủy lắng nghe sự kiện khi Component bị unmount để tránh rò rỉ bộ nhớ (memory leak)
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 

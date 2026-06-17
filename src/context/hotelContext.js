@@ -1,46 +1,22 @@
-/**
- * Tạo Context Provider cho dữ liệu khách sạn (Hotel).
- *
- * @param {Object} props - Các props của component
- * @param {Object} props.hotel - Đối tượng khách sạn chứa thông tin chi tiết của khách sạn
- * @param {React.ReactNode} props.children - Các component con sẽ được bọc bởi Provider này.
- *                                           Children là các React component/element mà sẽ có quyền truy cập
- *                                           vào HotelContext thông qua useContext hook
- * @returns {React.ReactElement} Trả về HotelContext.Provider bọc toàn bộ children components
- *
- * @description
- * HotelProvider là một Context Provider component dùng để:
- * - Cung cấp dữ liệu hotel cho tất cả các component con (descendants) mà không cần prop drilling
- * - Sử dụng useMemo để đảm bảo object value ổn định, chỉ thay đổi khi prop 'hotel' thay đổi
- * - Giúp tránh re-render không cần thiết ở các component con
- *
- * @example
- * <HotelProvider hotel={hotelData}>
- *   <Router />
- * </HotelProvider>
- */
 import { createContext, createElement, useContext, useMemo } from "react";
-// Shared hotel context.
+
+// Khởi tạo một React Context trống cho thông tin đặt phòng khách sạn
 export const HotelContext = createContext(null);
 
-// Called by: App để bọc toàn bộ router tree.
-// Params:
-// - hotel: Hotel.
-// - children: ReactNode
-// Output: Context Provider chứa toàn bộ hotel state.
-// Does: gom dữ liệu khách sạn vào một nguồn dùng chung, tránh prop drilling.
+// Component Provider dùng để gom thông tin đặt phòng vào một nguồn dùng chung duy nhất
+// Tránh việc phải truyền props thủ công xuống các component con sâu trong cấu trúc cây
 export const HotelProvider = ({
-  selectedHotel,
-  startDay,
-  endDay,
-  location,
-  onSelectHotel,
-  onSetStartDay,
-  onSetEndDay,
-  onSetLocation,
-  children,
+  selectedHotel,    // Khách sạn đang được chọn để đặt phòng
+  startDay,         // Ngày nhận phòng
+  endDay,           // Ngày trả phòng
+  location,         // Vị trí/Khu vực tìm kiếm hiện tại
+  onSelectHotel,    // Callback khi chọn khách sạn
+  onSetStartDay,    // Callback đặt ngày nhận phòng
+  onSetEndDay,      // Callback đặt ngày trả phòng
+  onSetLocation,    // Callback đặt vị trí/địa chỉ tìm kiếm
+  children,         // Các React Component con được bọc
 }) => {
-  // Does: giữ hotel ổn định giữa các lần render (trừ khi dependency đổi).
+  // Giữ object dữ liệu ổn định giữa các lần render để giảm thiểu việc re-render không cần thiết của component con
   const value = useMemo(
     () => ({
       selectedHotel,
@@ -54,9 +30,12 @@ export const HotelProvider = ({
     }),
     [selectedHotel, startDay, endDay, location],
   );
+  
+  // Trả về thẻ Provider truyền dữ liệu Context đặt phòng xuống dưới
   return createElement(HotelContext.Provider, { value }, children);
 };
 
+// Custom hook giúp truy xuất nhanh các state và hàm quản lý đặt phòng từ HotelContext
 export const useHotel = () => {
   const context = useContext(HotelContext);
   if (!context) {

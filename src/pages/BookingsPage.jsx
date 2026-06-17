@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import { bookingAPI } from "../services/api";
 
+// Cấu hình các nhãn hiển thị trạng thái đơn đặt phòng tương ứng với mã màu CSS
 const STATUS_LABEL = {
   pending:   { text: "Chờ xác nhận", color: "#f59e0b" },
   confirmed: { text: "Đã xác nhận",  color: "#10b981" },
@@ -10,29 +11,37 @@ const STATUS_LABEL = {
   completed: { text: "Hoàn thành",   color: "#6366f1" },
 };
 
+// Hàm định dạng hiển thị ngày tháng sang kiểu Việt Nam (DD/MM/YYYY)
 const fmt = (d) => new Date(d).toLocaleDateString("vi-VN");
+// Hàm định dạng hiển thị tiền tệ Việt Nam đồng
 const fmtPrice = (p) => Number(p).toLocaleString("vi-VN") + "₫";
 
+// Component Lịch sử Đặt phòng (Bookings Page)
 export default function BookingsPage() {
   const { currentUser } = useUser();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading]   = useState(true);
-  const [cancelling, setCancelling] = useState(null); // id đang hủy
+  const [cancelling, setCancelling] = useState(null); // Lưu trữ ID đơn đang gửi yêu cầu hủy lên server
 
-  if (!currentUser) return <Navigate to="/login" replace />;
-
+  // Lấy lịch sử đặt phòng của user từ API sau khi mount component
   useEffect(() => {
+    if (!currentUser) return;
     bookingAPI.getAll()
       .then((res) => { if (res.success) setBookings(res.data); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentUser]);
 
+  // Điều hướng bảo vệ: Nếu chưa đăng nhập, tự động chuyển sang trang Login
+  if (!currentUser) return <Navigate to="/login" replace />;
+
+  // Xử lý gửi yêu cầu hủy đặt phòng lên backend
   const handleCancel = async (id) => {
     if (!window.confirm("Bạn có chắc muốn hủy đặt phòng này?")) return;
     setCancelling(id);
     const res = await bookingAPI.cancel(id);
     if (res.success) {
+      // Cập nhật trạng thái trực tiếp trên State để tránh phải reload lại trang
       setBookings((prev) =>
         prev.map((b) => b.id === id ? { ...b, status: "cancelled" } : b)
       );
@@ -44,6 +53,7 @@ export default function BookingsPage() {
 
   return (
     <div className="app page-with-header-offset">
+      {/* Banner trang trí */}
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Đặt phòng của tôi</h1>
@@ -56,6 +66,7 @@ export default function BookingsPage() {
           {loading ? (
             <div className="loading-wrap"><div className="loading-spinner" /><p>Đang tải...</p></div>
           ) : bookings.length === 0 ? (
+            // Khối hiển thị khi chưa có đơn đặt phòng nào
             <div className="wishlist-empty">
               <h2 className="section-title">Chưa có đặt phòng nào</h2>
               <p>Bạn chưa đặt phòng khách sạn nào.</p>
@@ -64,9 +75,11 @@ export default function BookingsPage() {
               </Link>
             </div>
           ) : (
+            // Danh sách các thẻ đặt phòng (booking cards)
             <div className="bookings-list">
               {bookings.map((b) => {
                 const status = STATUS_LABEL[b.status] || { text: b.status, color: "#888" };
+                // Tính số đêm lưu trú từ ngày nhận và ngày trả phòng
                 const nights = Math.ceil((new Date(b.check_out) - new Date(b.check_in)) / 86400000);
                 return (
                   <div key={b.id} className="booking-card">
@@ -74,6 +87,7 @@ export default function BookingsPage() {
                     <div className="booking-info">
                       <div className="booking-header">
                         <h3 className="booking-hotel-name">{b.hotel_name}</h3>
+                        {/* Nhãn hiển thị trạng thái với màu tương ứng */}
                         <span className="booking-status" style={{ color: status.color, borderColor: status.color }}>
                           {status.text}
                         </span>
@@ -88,6 +102,7 @@ export default function BookingsPage() {
                       </p>
                       <div className="booking-footer">
                         <span className="booking-total">{fmtPrice(b.total_price)}</span>
+                        {/* Chỉ hiển thị nút Hủy đơn nếu trạng thái là pending (chờ xác nhận) hoặc confirmed (đã xác nhận) */}
                         {(b.status === "pending" || b.status === "confirmed") && (
                           <button
                             className="cancel-btn"
@@ -98,6 +113,7 @@ export default function BookingsPage() {
                           </button>
                         )}
                       </div>
+                      {/* Hiển thị ghi chú của người dùng nếu có */}
                       {b.note && <p className="booking-note">📝 {b.note}</p>}
                     </div>
                   </div>

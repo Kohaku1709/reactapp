@@ -1,7 +1,8 @@
 const { validationResult } = require("express-validator");
 const pool = require("../config/db");
 
-// GET /api/bookings  — Lịch sử đặt phòng của user
+// API: Lấy danh sách lịch sử đặt phòng của người dùng hiện tại (yêu cầu đăng nhập)
+// GET /api/bookings
 const getMyBookings = async (req, res) => {
   try {
     const result = await pool.query(
@@ -24,8 +25,10 @@ const getMyBookings = async (req, res) => {
   }
 };
 
-// POST /api/bookings  — Tạo đặt phòng mới
+// API: Tạo đơn đặt phòng mới (yêu cầu đăng nhập)
+// POST /api/bookings
 const createBooking = async (req, res) => {
+  // Trả về lỗi nếu tham số truyền vào thiếu/không hợp lệ
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
@@ -34,7 +37,7 @@ const createBooking = async (req, res) => {
   const { hotel_id, check_in, check_out, guests = 1, rooms = 1, note } = req.body;
 
   try {
-    // Lấy giá khách sạn tại thời điểm đặt
+    // 1. Kiểm tra sự tồn tại và tính hoạt động của khách sạn cần đặt
     const hotelRes = await pool.query(
       "SELECT id, price, is_active FROM hotels WHERE id=$1",
       [hotel_id]
@@ -47,17 +50,23 @@ const createBooking = async (req, res) => {
     const checkIn  = new Date(check_in);
     const checkOut = new Date(check_out);
 
+    // Kiểm tra tính hợp lệ của thời gian nhận/trả phòng
     if (checkOut <= checkIn) {
       return res.status(400).json({ success: false, message: "Ngày trả phòng phải sau ngày nhận phòng." });
     }
 
+    // 2. Tính số đêm thuê thực tế
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+    
+    // 3. Tính tổng số tiền đặt phòng = giá một phòng/đêm * số đêm * số phòng đặt
     const totalPrice = hotel.price * nights * rooms;
 
+    // 4. Chèn thông tin đơn đặt phòng mới vào database. Vì người dùng đã thực hiện thanh toán thành công
+    // ở giao diện Frontend, trạng thái ban đầu của hóa đơn sẽ tự động được gán là 'confirmed' (đã xác nhận)
     const result = await pool.query(
-      `INSERT INTO bookings(user_id, hotel_id, check_in, check_out, guests, rooms, total_price, note)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [req.user.id, hotel_id, check_in, check_out, guests, rooms, totalPrice, note || null]
+      `INSERT INTO bookings(user_id, hotel_id, check_in, check_out, guests, rooms, total_price, status, note)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [req.user.id, hotel_id, check_in, check_out, guests, rooms, totalPrice, 'confirmed', note || null]
     );
 
     res.status(201).json({
@@ -71,7 +80,8 @@ const createBooking = async (req, res) => {
   }
 };
 
-// GET /api/bookings/:id  — Chi tiết một booking
+// API: Lấy chi tiết của một đơn đặt phòng cụ thể theo ID (yêu cầu đăng nhập)
+// GET /api/bookings/:id
 const getBookingById = async (req, res) => {
   const { id } = req.params;
   if (isNaN(id)) {
@@ -89,6 +99,7 @@ const getBookingById = async (req, res) => {
       [id, req.user.id]
     );
 
+    // Trả về lỗi 404 nếu không tìm thấy đơn đặt phòng hoặc đơn không thuộc quyền sở hữu của user hiện tại
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Không tìm thấy đơn đặt phòng." });
     }
@@ -100,7 +111,8 @@ const getBookingById = async (req, res) => {
   }
 };
 
-// PATCH /api/bookings/:id/cancel  — Hủy đặt phòng
+// API: Hủy đơn đặt phòng (yêu cầu đăng nhập)
+// PATCH /api/bookings/:id/cancel
 const cancelBooking = async (req, res) => {
   const { id } = req.params;
   if (isNaN(id)) {
@@ -108,6 +120,7 @@ const cancelBooking = async (req, res) => {
   }
 
   try {
+    // 1. Kiểm tra sự tồn tại của đơn đặt phòng
     const existing = await pool.query(
       "SELECT id, status FROM bookings WHERE id=$1 AND user_id=$2",
       [id, req.user.id]
@@ -118,6 +131,7 @@ const cancelBooking = async (req, res) => {
     }
 
     const booking = existing.rows[0];
+    // Ngăn chặn các trạng thái không hợp lệ: đã hủy từ trước hoặc đơn đã hoàn thành lưu trú
     if (booking.status === "cancelled") {
       return res.status(400).json({ success: false, message: "Đơn này đã bị hủy trước đó." });
     }
@@ -125,6 +139,7 @@ const cancelBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: "Không thể hủy đơn đã hoàn thành." });
     }
 
+    // 2. Tiến hành cập nhật trạng thái đơn thành 'cancelled' (đã hủy)
     const result = await pool.query(
       "UPDATE bookings SET status='cancelled' WHERE id=$1 RETURNING *",
       [id]

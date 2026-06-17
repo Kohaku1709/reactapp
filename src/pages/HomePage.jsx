@@ -9,26 +9,32 @@ import { hotelAPI, locationAPI } from "../services/api";
 import { HOTEL_FILTERS, HOTEL_FILTER_DEFAULTS, HOTEL_SORT_DEFAULT, HOTEL_SORT_OPTIONS } from "../utils/hotelQuery";
 import useHotelListing from "../hooks/useHotelListing";
 
+// Component Trang chủ (Home Page)
 export default function HomePage() {
   const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
   const navigate = useNavigate();
 
-  const [hotels, setHotels]           = useState([]);
-  const [destinations, setDestinations] = useState([]);
-  const [loadingHotels, setLoadingHotels] = useState(true);
+  // State lưu trữ dữ liệu từ API
+  const [hotels, setHotels]           = useState([]);       // Mảng chứa các khách sạn nổi bật
+  const [destinations, setDestinations] = useState([]);   // Mảng chứa danh sách các điểm đến phổ biến
+  const [loadingHotels, setLoadingHotels] = useState(true); // Trạng thái chờ tải dữ liệu khách sạn
 
+  // State lưu trữ lựa chọn tìm kiếm của người dùng
   const [destination, setDestination] = useState("");
   const [checkin, setCheckin]         = useState(null);
   const [checkout, setCheckout]       = useState(null);
+  
+  // State quản lý bộ lọc hoạt động và kiểu sắp xếp của danh sách khách sạn hiển thị ở trang chủ
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy]           = useState(HOTEL_SORT_DEFAULT);
-  const [visibleRows, setVisibleRows] = useState(4);
-  const gridColumns = useResponsiveGridColumns();
+  const [visibleRows, setVisibleRows] = useState(4); // Số hàng khách sạn hiển thị ban đầu
+  const gridColumns = useResponsiveGridColumns(); // Hook tính số cột grid responsive
 
+  // Kiểm tra tính năng wishlist có khả dụng hay không (yêu cầu phải đăng nhập)
   const isWishlistEnabled = Boolean(currentUser);
   const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
 
-  // Lấy khách sạn nổi bật từ API
+  // Lấy danh sách khách sạn nổi bật khi trang chủ được mount
   useEffect(() => {
     hotelAPI.getFeatured()
       .then((res) => { if (res.success) setHotels(res.data); })
@@ -36,29 +42,32 @@ export default function HomePage() {
       .finally(() => setLoadingHotels(false));
   }, []);
 
-  // Lấy danh sách điểm đến từ API
+  // Lấy danh sách điểm đến phổ biến từ API
   useEffect(() => {
     locationAPI.getAll()
       .then((res) => { if (res.success) setDestinations(res.data); })
       .catch(() => {});
   }, []);
 
+  // Tự động gom các địa chỉ khách sạn và tên điểm đến để tạo gợi ý nhập liệu (Datalist suggestions)
   const addressSuggestions = useMemo(() => {
     const destNames = destinations.map((d) => d.name);
     const locs = hotels.map((h) => h.location);
     return [...new Set([...destNames, ...locs])];
   }, [destinations, hotels]);
 
+  // Xử lý gửi Form tìm kiếm, chuyển hướng sang trang /hotels kèm state địa chỉ tìm kiếm
   const handleSearch = (event) => {
     event?.preventDefault();
     navigate("/hotels", { state: { searchAddress: destination.trim() } });
   };
 
+  // Xử lý khi click vào Card điểm đến, chuyển hướng nhanh sang trang tìm kiếm theo điểm đến đó
   const handleDestinationClick = (name) => {
     navigate("/hotels", { state: { searchAddress: name } });
   };
 
-  // Pipeline filter cho section "Khách sạn nổi bật" dùng data từ API
+  // Pipeline xử lý bộ lọc cho danh sách khách sạn nổi bật ở trang chủ (chạy local trên client)
   const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
     hotelList: hotels,
     activeFilter,
@@ -69,18 +78,21 @@ export default function HomePage() {
     extraFilter: undefined,
   });
 
-  useEffect(() => { setVisibleRows(4); }, [activeFilter, sortBy]);
+
 
   return (
     <div className="app">
-      {/* Hero search */}
+      {/* 1. Phần Hero banner lớn kèm ô tìm kiếm */}
       <section className="hero">
         <div className="hero-bg"><div className="hero-overlay" /></div>
         <div className="hero-content">
           <p className="hero-eyebrow">Ưu đãi lên đến 40% · Hơn 500,000 khách sạn toàn cầu</p>
           <h1 className="hero-title">Tìm chỗ nghỉ <span className="hero-highlight">hoàn hảo</span> của bạn</h1>
           <p className="hero-sub">Đặt phòng nhanh chóng, giá tốt nhất, không phí ẩn</p>
+          
+          {/* Hộp tìm kiếm khách sạn */}
           <form className="search-box" onSubmit={handleSearch}>
+            {/* Trường nhập địa điểm */}
             <div className="search-field destination-field">
               <span className="field-icon">📍</span>
               <div className="search-field-body">
@@ -98,6 +110,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="search-divider" />
+            
+            {/* Trường chọn ngày nhận phòng */}
             <div className="search-field">
               <span className="field-icon">📅</span>
               <div>
@@ -107,6 +121,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="search-divider" />
+            
+            {/* Trường chọn ngày trả phòng */}
             <div className="search-field">
               <span className="field-icon">📅</span>
               <div className="search-field-text">
@@ -115,12 +131,14 @@ export default function HomePage() {
                   dateFormat="dd/MM/yyyy" placeholderText="Chọn ngày" minDate={checkin || new Date()} />
               </div>
             </div>
+            
+            {/* Nút gửi tìm kiếm */}
             <button type="submit" className="search-btn">🔍 Tìm kiếm</button>
           </form>
         </div>
       </section>
 
-      {/* Điểm đến phổ biến */}
+      {/* 2. Danh mục Điểm đến phổ biến */}
       {destinations.length > 0 && (
         <section className="section destinations-section">
           <div className="section-inner">
@@ -142,24 +160,29 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Khách sạn nổi bật */}
+      {/* 3. Danh sách Khách sạn nổi bật */}
       <section className="section hotels-section">
         <div className="section-inner">
           <div className="section-header">
             <h2 className="section-title">Khách sạn nổi bật</h2>
             <span className="result-count">{filteredHotels.length} khách sạn</span>
           </div>
+          
+          {/* Thanh Toolbar lọc & sắp xếp */}
           <div className="hotels-toolbar">
+            {/* Nút lọc nhanh theo danh mục */}
             <div className="filter-bar">
               {HOTEL_FILTERS.map((f) => (
                 <button key={f}
                   className={`filter-btn ${activeFilter === f ? "active" : ""}`}
-                  onClick={() => setActiveFilter(f)}>{f}</button>
+                  onClick={() => { setActiveFilter(f); setVisibleRows(4); }}>{f}</button>
               ))}
             </div>
+            
+            {/* Dropdown sắp xếp */}
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
-              <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <select className="sort-select" value={sortBy} onChange={(e) => { setSortBy(e.target.value); setVisibleRows(4); }}>
                 {HOTEL_SORT_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
@@ -171,6 +194,7 @@ export default function HomePage() {
             <div className="loading-wrap"><div className="loading-spinner" /><p>Đang tải...</p></div>
           ) : (
             <>
+              {/* Lưới hiển thị các thẻ khách sạn */}
               <div className="hotels-grid">
                 {visibleHotels.map((hotel) => (
                   <HotelCard key={hotel.id} hotel={hotel}
@@ -180,6 +204,8 @@ export default function HomePage() {
                   />
                 ))}
               </div>
+              
+              {/* Nút xem thêm khách sạn */}
               {hasMoreHotels && (
                 <div className="load-more-wrap">
                   <button className="load-more-btn" onClick={() => setVisibleRows((p) => p + 4)}>

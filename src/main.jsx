@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// Called by: Vite runtime khi bundle đã load trên browser.
-// Params: document.getElementById("root"). Accepted values: HTMLElement hợp lệ, không null.
-// Output: React tree được mount vào DOM.
-// Does: khởi tạo ứng dụng bằng React 18 API createRoot + StrictMode.
+// File khởi chạy ứng dụng React (Entry point)
+// 1. Tìm phần tử HTML có id="root" trong tệp index.html
+// 2. Sử dụng createRoot để quản lý và render cây Component của React vào root đó
+// 3. StrictMode được bọc bên ngoài để cảnh báo các lỗi tiềm ẩn trong quá trình phát triển
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

@@ -6,27 +6,39 @@ import { useUser } from "../context/userContext";
 import { hotelAPI } from "../services/api";
 import { HOTEL_FILTERS, HOTEL_SORT_DEFAULT, HOTEL_SORT_OPTIONS } from "../utils/hotelQuery";
 
+// Component Trang danh sách toàn bộ khách sạn (Hotels Page)
 export default function HotelsPage() {
   const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
   const routeLocation = useLocation();
+  // Đọc từ khóa tìm kiếm được truyền từ Trang chủ nếu có
   const initialSearch = routeLocation.state?.searchAddress || "";
 
+  // State quản lý danh sách khách sạn và trạng thái gọi API
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  // State quản lý bộ lọc và sắp xếp
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
+  
+  // State lọc địa chỉ/tên khách sạn trực tiếp bằng ô input trên trang
   const [addressQuery, setAddressQuery] = useState(typeof initialSearch === "string" ? initialSearch.trim() : "");
+  
+  // State phân trang: quản lý số lượng card khách sạn hiển thị tối đa
   const [visibleCount, setVisibleCount] = useState(12);
-  const gridColumns = useResponsiveGridColumns();
+  const gridColumns = useResponsiveGridColumns(); // Hook tính số cột grid responsive
 
   const isWishlistEnabled = Boolean(currentUser);
   const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
 
-  // Fetch từ API mỗi khi filter/sort thay đổi
+  // Gọi API tải danh sách khách sạn dựa trên các tiêu chí lọc, sắp xếp, tìm kiếm đã chọn
+  // (Nhờ Backend cập nhật, quá trình lọc và sắp xếp này diễn ra hoàn toàn chính xác ở DB)
   const fetchHotels = useCallback(() => {
-    setLoading(true);
-    setError("");
+    Promise.resolve().then(() => {
+      setLoading(true);
+      setError("");
+    });
     hotelAPI.getAll({ filter: activeFilter, sort: sortBy, search: addressQuery, limit: 100 })
       .then((res) => {
         if (res.success) setHotels(res.data);
@@ -36,22 +48,33 @@ export default function HotelsPage() {
       .finally(() => setLoading(false));
   }, [activeFilter, sortBy, addressQuery]);
 
+  // Kích hoạt gọi API mỗi khi các tham số lọc hoặc sắp xếp thay đổi
   useEffect(() => { fetchHotels(); }, [fetchHotels]);
 
-  // Reset visible khi filter thay đổi
-  useEffect(() => { setVisibleCount(12); }, [activeFilter, sortBy, addressQuery]);
+  // Reset số lượng khách sạn hiển thị về 12 mỗi khi người dùng đổi bộ lọc
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setVisibleCount(12);
+    });
+  }, [activeFilter, sortBy, addressQuery]);
 
-  // Sync địa chỉ từ route state (navigate từ HomePage)
+  // Đồng bộ lại ô tìm kiếm địa chỉ khi người dùng navigate từ Trang chủ qua (sử dụng State điều hướng)
   useEffect(() => {
     const s = routeLocation.state?.searchAddress;
-    if (typeof s === "string") setAddressQuery(s.trim());
+    if (typeof s === "string") {
+      Promise.resolve().then(() => {
+        setAddressQuery(s.trim());
+      });
+    }
   }, [routeLocation.state]);
 
+  // Cắt lát (Slice) mảng để phân trang hiển thị thực tế trên UI
   const visibleHotels = hotels.slice(0, visibleCount);
   const hasMore = visibleCount < hotels.length;
 
   return (
     <div className="app page-with-header-offset">
+      {/* Khối Banner trang trí đầu trang */}
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Tất cả khách sạn</h1>
@@ -61,7 +84,9 @@ export default function HotelsPage() {
 
       <section className="section hotels-section">
         <div className="section-inner">
+          {/* Thanh Toolbar lọc & sắp xếp */}
           <div className="hotels-toolbar">
+            {/* Bộ lọc nhanh */}
             <div className="filter-bar">
               {HOTEL_FILTERS.map((f) => (
                 <button key={f}
@@ -69,6 +94,8 @@ export default function HotelsPage() {
                   onClick={() => setActiveFilter(f)}>{f}</button>
               ))}
             </div>
+            
+            {/* Tiêu chí sắp xếp */}
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
               <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -79,6 +106,7 @@ export default function HotelsPage() {
             </div>
           </div>
 
+          {/* Ô nhập lọc nhanh theo địa chỉ/tên khách sạn */}
           <div className="address-filter-wrap">
             <span className="address-filter-icon">📍</span>
             <input
@@ -87,6 +115,7 @@ export default function HotelsPage() {
               onChange={(e) => setAddressQuery(e.target.value)}
               placeholder="Lọc nhanh theo địa chỉ..."
             />
+            {/* Hiển thị nút Xóa nhanh từ khóa khi có chữ */}
             {addressQuery && (
               <button className="address-clear-btn" type="button" onClick={() => setAddressQuery("")}>
                 Xóa
@@ -94,12 +123,14 @@ export default function HotelsPage() {
             )}
           </div>
 
+          {/* Dòng tóm tắt kết quả tìm kiếm */}
           <div className="section-header hotels-result-header">
             <span className="result-count">
               {loading ? "Đang tải..." : `${hotels.length} khách sạn được tìm thấy`}
             </span>
           </div>
 
+          {/* Hiển thị lỗi nếu có */}
           {error && <p style={{ color: "red", textAlign: "center", padding: "1rem" }}>{error}</p>}
 
           {loading ? (
@@ -109,6 +140,7 @@ export default function HotelsPage() {
             </div>
           ) : (
             <>
+              {/* Lưới hiển thị danh sách thẻ khách sạn */}
               <div className="hotels-grid">
                 {visibleHotels.map((hotel) => (
                   <HotelCard
@@ -120,6 +152,8 @@ export default function HotelsPage() {
                   />
                 ))}
               </div>
+              
+              {/* Nút Xem thêm */}
               {hasMore && (
                 <div className="load-more-wrap">
                   <button className="load-more-btn"

@@ -3,13 +3,15 @@ const { getHotels, getHotelById, getFeaturedHotels } = require("../controllers/h
 
 const router = express.Router();
 
-// GET /api/hotels/featured  — phải đặt TRƯỚC /:id để không bị match nhầm
+// Định nghĩa các endpoint khách sạn:
+// 1. Lấy danh sách khách sạn nổi bật (GET /api/hotels/featured)
+// Lưu ý: Đặt route tĩnh này TRƯỚC route động /:id để tránh Express nhận nhầm chữ "featured" làm ID khách sạn
 router.get("/featured", getFeaturedHotels);
 
-// GET /api/hotels?filter=...&sort=...&search=...&page=...&limit=...
+// 2. Lấy toàn bộ danh sách khách sạn kèm bộ lọc và tìm kiếm (GET /api/hotels)
 router.get("/", getHotels);
 
-// GET /api/hotels/:id
+// 3. Lấy thông tin chi tiết một khách sạn theo ID (GET /api/hotels/:id)
 router.get("/:id", getHotelById);
 
 module.exports = router;

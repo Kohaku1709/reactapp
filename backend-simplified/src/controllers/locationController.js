@@ -1,8 +1,10 @@
 const pool = require("../config/db");
 
-// GET /api/locations  — Lấy danh sách điểm đến (dùng cho HomePage)
+// API: Lấy danh sách toàn bộ các địa điểm du lịch phổ biến (dùng hiển thị trên trang chủ)
+// GET /api/locations
 const getLocations = async (req, res) => {
   try {
+    // Truy vấn danh sách điểm đến và sắp xếp theo số lượng khách sạn giảm dần
     const result = await pool.query(
       "SELECT id, name, slug, hotel_count, img_url FROM locations ORDER BY hotel_count DESC"
     );
