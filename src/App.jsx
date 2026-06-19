@@ -7,11 +7,11 @@ import { getToken, removeToken, wishlistAPI } from "./services/api";
 import "./App.css";
 
 // Lazy loading các trang (pages) để tối ưu hiệu suất tải trang ban đầu (chỉ tải trang khi người dùng truy cập)
-const HomePage     = lazy(() => import("./pages/HomePage"));
-const AboutPage    = lazy(() => import("./pages/AboutPage"));
-const HotelsPage   = lazy(() => import("./pages/HotelsPage"));
-const ContactPage  = lazy(() => import("./pages/ContactPage"));
-const LoginPage    = lazy(() => import("./pages/LoginPage"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const HotelsPage = lazy(() => import("./pages/HotelsPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const BookingsPage = lazy(() => import("./pages/BookingsPage"));
@@ -35,35 +35,9 @@ export default function App() {
   // State lưu trữ danh sách ID các khách sạn yêu thích (wishlist) của user
   const [wishlistHotelIds, setWishlistHotelIds] = useState([]);
   // State lưu trữ danh sách đầy đủ thông tin các khách sạn yêu thích
-  const [wishlistHotels,   setWishlistHotels]   = useState([]);
-
-  // Đồng bộ hóa thông tin currentUser với localStorage khi state thay đổi
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-    }
-  }, [currentUser]);
-
-  // Tải danh sách wishlist (cả IDs và Object dữ liệu) từ Backend mỗi khi người dùng đăng nhập
-  useEffect(() => {
-    if (!currentUser || !getToken()) {
-      Promise.resolve().then(() => {
-        setWishlistHotelIds([]);
-        setWishlistHotels([]);
-      });
-      return;
-    }
-    wishlistAPI.getAll()
-      .then((res) => {
-        if (res.success) {
-          setWishlistHotelIds(res.wishlistIds || []);
-          setWishlistHotels(res.data || []);
-        }
-      })
-      .catch(() => {});
-  }, [currentUser]);
+  const [wishlistHotels, setWishlistHotels] = useState([]);
+  // State lưu trữ ID các khách sạn đã đặt phòng (bookings) của user
+  const [bookedHotelIds, setBookedHotelIds] = useState([]); // Giữ lại khai báo state này nếu bạn vẫn muốn dùng nó cho các mục đích khác, nhưng logic nạp dữ liệu sẽ bị xóa.
 
   // Xử lý khi đăng nhập thành công
   const handleLogin = useCallback((user) => {
@@ -76,17 +50,18 @@ export default function App() {
     setCurrentUser(null);
     setWishlistHotelIds([]);
     setWishlistHotels([]);
+    setBookedHotelIds([]); // Giữ lại việc xóa khi logout nếu bạn vẫn muốn dùng state này
   }, []);
 
   // Xử lý thêm/bớt khách sạn khỏi danh sách yêu thích (wishlist)
   const handleToggleWishlist = useCallback((hotelId) => {
     if (!getToken()) return;
-    
+
     // Cập nhật giao diện lập tức (Optimistic UI update) để tăng tốc độ phản hồi cho người dùng
     setWishlistHotelIds((prev) =>
       prev.includes(hotelId) ? prev.filter((id) => id !== hotelId) : [...prev, hotelId]
     );
-    
+
     // Gửi yêu cầu cập nhật lên Backend và đồng bộ lại danh sách chính xác
     wishlistAPI.toggle(hotelId)
       .then((res) => {
@@ -100,7 +75,7 @@ export default function App() {
           setWishlistHotels(res.data || []);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // State và Effect quản lý nút cuộn nhanh về đầu trang (Back to Top)
@@ -125,6 +100,8 @@ export default function App() {
       currentUser={currentUser}
       wishlistHotelIds={wishlistHotelIds}
       wishlistHotels={wishlistHotels}
+      bookedHotelIds={bookedHotelIds} // Giữ lại việc truyền state này nếu bạn vẫn muốn dùng nó cho các mục đích khác
+      setBookedHotelIds={setBookedHotelIds} // Giữ lại việc truyền hàm này nếu bạn vẫn muốn dùng nó cho các mục đích khác
       onLogin={handleLogin}
       onLogout={handleLogout}
       onToggleWishlist={handleToggleWishlist}
@@ -132,26 +109,26 @@ export default function App() {
       <BrowserRouter>
         {/* Navbar đầu trang */}
         <Navbar />
-        
+
         {/* Suspense hiển thị trạng thái chờ trong khi Lazy Loading các trang */}
         <Suspense fallback={<div className="route-loading">Đang tải trang...</div>}>
           <Routes>
-            <Route path="/"         element={<HomePage />} />
-            <Route path="/hotels"   element={<HotelsPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/hotels" element={<HotelsPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/about-us" element={<AboutPage />} />
-            <Route path="/contact"  element={<ContactPage />} />
-            <Route path="/login"    element={<LoginPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/profile"  element={<ProfilePage />} />
-            <Route path="/admin"    element={<AdminDashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
           </Routes>
         </Suspense>
-        
+
         {/* Footer cuối trang */}
         <Footer />
-        
+
         {/* Nút cuộn về đầu trang */}
         {showBackToTop && (
           <button className="back-to-top-btn" onClick={handleBackToTop} aria-label="Back to top">↑</button>

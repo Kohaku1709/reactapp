@@ -2,11 +2,11 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { bookingAPI } from "../services/api";
-import { useUser } from "../context/userContext";
+// import { useUser } from "../context/userContext"; // Đã hoàn tác
 
 // Component hiển thị Modal nhập thông tin đặt phòng khách sạn
 export default function BookingModal({ hotel, onClose }) {
-  const { setBookedHotelIds } = useUser();
+  // const { setBookedHotelIds } = useUser(); // Đã hoàn tác
   // State quản lý ngày nhận và trả phòng
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
@@ -53,9 +53,9 @@ export default function BookingModal({ hotel, onClose }) {
         note: note.trim() || undefined,
       });
       if (res.success) {
-        setSuccess(true);
-        // Cập nhật ngay lập tức vào state toàn cục để nút ở HotelCard đổi trạng thái
-        setBookedHotelIds(prev => [...new Set([...prev, Number(hotel.id)])]);
+        setSuccess(true); // Giữ lại logic thành công
+        // Cập nhật ngay lập tức vào state toàn cục để nút ở HotelCard đổi trạng thái // Đã hoàn tác
+        // setBookedHotelIds(prev => [...new Set([...prev, Number(hotel.id)])]); // Đã hoàn tác
       }
       else setError(res.message || res.errors?.[0]?.msg || "Đặt phòng thất bại.");
     } catch {

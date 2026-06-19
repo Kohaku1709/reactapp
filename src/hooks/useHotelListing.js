@@ -21,14 +21,16 @@ export default function useHotelListing({
     return baseFiltered.filter(extraFilter);
   }, [hotelList, activeFilter, filterOptions, extraFilter]);
 
-  // 2. Sắp xếp (Sort) dữ liệu sau khi lọc
+  // 2. Sắp xếp (Sort) dữ liệu sau khi lọc  
   const sortedHotels = useMemo(
     () => sortHotels(filteredHotels, sortBy),
     [filteredHotels, sortBy],
   );
 
-  // Tính tổng số lượng khách sạn tối đa được phép hiển thị trên màn hình hiện tại
-  const visibleCount = visibleRows * gridColumns;
+    // Tính tổng số lượng khách sạn tối đa được phép hiển thị trên màn hình hiện tại
+  const actualFullRows = Math.floor(sortedHotels.length / gridColumns);
+  const visibleCount = Math.min(visibleRows, actualFullRows) * gridColumns;
+
 
   // 3. Phân trang cắt mảng (Paginate) để lấy danh sách khách sạn hiển thị thực tế
   const visibleHotels = useMemo(

@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
   }
 
   // ─── XỬ LÝ CRUD KHÁCH SẠN ──────────────────────────────────────────────────
-  
+
   // Mở Form thêm mới khách sạn
   const handleOpenAddForm = () => {
     setEditingHotel(null);
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
   };
 
   // ─── XỬ LÝ ĐƠN ĐẶT PHÒNG ────────────────────────────────────────────────────
-  
+
   const handleUpdateBookingStatus = async (bookingId, status) => {
     try {
       const res = await adminAPI.updateBookingStatus(bookingId, status);
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
   };
 
   // ─── XỬ LÝ TIN NHẮN LIÊN HỆ ─────────────────────────────────────────────────
-  
+
   const handleMarkContactRead = async (id) => {
     try {
       const res = await adminAPI.markContactRead(id);
@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
 
       <section className="section section-white">
         <div className="section-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
-          
+
           {/* Thông báo Alert */}
           {message.text && (
             <div style={{
@@ -317,7 +317,7 @@ export default function AdminDashboardPage() {
                       onChange={(e) => setHotelSearch(e.target.value)}
                       style={{ maxWidth: "400px" }}
                     />
-                    
+
                     {/* Nút thêm khách sạn */}
                     <button onClick={handleOpenAddForm} className="search-btn" style={{ padding: "10px 20px" }}>
                       ➕ Thêm khách sạn mới
@@ -333,23 +333,23 @@ export default function AdminDashboardPage() {
                       <form onSubmit={handleSaveHotel} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.2rem" }}>
                         <div className="form-group" style={{ gridColumn: "span 2" }}>
                           <label className="form-label">Tên khách sạn <span style={{ color: "red" }}>*</span></label>
-                          <input type="text" className="form-input" required value={hotelForm.name} onChange={e => setHotelForm({...hotelForm, name: e.target.value})} placeholder="VD: Khách sạn Mường Thanh Hà Nội" />
+                          <input type="text" className="form-input" required value={hotelForm.name} onChange={e => setHotelForm({ ...hotelForm, name: e.target.value })} placeholder="VD: Khách sạn Mường Thanh Hà Nội" />
                         </div>
                         <div className="form-group" style={{ gridColumn: "span 2" }}>
                           <label className="form-label">Địa chỉ chi tiết (nhớ ghi rõ Thành phố giống list địa điểm để hệ thống map) <span style={{ color: "red" }}>*</span></label>
-                          <input type="text" className="form-input" required value={hotelForm.location} onChange={e => setHotelForm({...hotelForm, location: e.target.value})} placeholder="VD: Tây Hồ, Hà Nội" />
+                          <input type="text" className="form-input" required value={hotelForm.location} onChange={e => setHotelForm({ ...hotelForm, location: e.target.value })} placeholder="VD: Tây Hồ, Hà Nội" />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Giá phòng mỗi đêm (VND) <span style={{ color: "red" }}>*</span></label>
-                          <input type="number" className="form-input" required value={hotelForm.price} onChange={e => setHotelForm({...hotelForm, price: e.target.value})} placeholder="VD: 1500000" />
+                          <input type="number" className="form-input" required value={hotelForm.price} onChange={e => setHotelForm({ ...hotelForm, price: e.target.value })} placeholder="VD: 1500000" />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Giá phòng gốc (chưa giảm) (VND)</label>
-                          <input type="number" className="form-input" value={hotelForm.original_price} onChange={e => setHotelForm({...hotelForm, original_price: e.target.value})} placeholder="VD: 2000000" />
+                          <input type="number" className="form-input" value={hotelForm.original_price} onChange={e => setHotelForm({ ...hotelForm, original_price: e.target.value })} placeholder="VD: 2000000" />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Số sao (1 - 5)</label>
-                          <select className="form-input" value={hotelForm.stars} onChange={e => setHotelForm({...hotelForm, stars: e.target.value})}>
+                          <select className="form-input" value={hotelForm.stars} onChange={e => setHotelForm({ ...hotelForm, stars: e.target.value })}>
                             <option value="5">5 sao</option>
                             <option value="4">4 sao</option>
                             <option value="3">3 sao</option>
@@ -359,23 +359,23 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="form-group">
                           <label className="form-label">Điểm đánh giá (0.0 - 5.0)</label>
-                          <input type="number" step="0.1" min="0" max="5" className="form-input" value={hotelForm.rating} onChange={e => setHotelForm({...hotelForm, rating: e.target.value})} />
+                          <input type="number" step="0.1" min="0" max="5" className="form-input" value={hotelForm.rating} onChange={e => setHotelForm({ ...hotelForm, rating: e.target.value })} />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Số lượt reviews đánh giá</label>
-                          <input type="number" className="form-input" value={hotelForm.reviews} onChange={e => setHotelForm({...hotelForm, reviews: e.target.value})} />
+                          <input type="number" className="form-input" value={hotelForm.reviews} onChange={e => setHotelForm({ ...hotelForm, reviews: e.target.value })} />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Nhãn nổi bật (Badge)</label>
-                          <input type="text" className="form-input" value={hotelForm.badge} onChange={e => setHotelForm({...hotelForm, badge: e.target.value})} placeholder="VD: Bán chạy, Giá tốt..." />
+                          <input type="text" className="form-input" value={hotelForm.badge} onChange={e => setHotelForm({ ...hotelForm, badge: e.target.value })} placeholder="VD: Bán chạy, Giá tốt..." />
                         </div>
                         <div className="form-group" style={{ gridColumn: "span 2" }}>
                           <label className="form-label">Đường dẫn ảnh trực tuyến (Image URL)</label>
-                          <input type="text" className="form-input" value={hotelForm.image_url} onChange={e => setHotelForm({...hotelForm, image_url: e.target.value})} placeholder="https://..." />
+                          <input type="text" className="form-input" value={hotelForm.image_url} onChange={e => setHotelForm({ ...hotelForm, image_url: e.target.value })} placeholder="https://..." />
                         </div>
                         <div className="form-group" style={{ gridColumn: "span 2" }}>
                           <label className="form-label">Tiện ích (Các tag, cách nhau bởi dấu phẩy)</label>
-                          <input type="text" className="form-input" value={hotelForm.tagsInput} onChange={e => setHotelForm({...hotelForm, tagsInput: e.target.value})} placeholder="Hồ bơi, Spa, View biển, Lễ tân 24/7" />
+                          <input type="text" className="form-input" value={hotelForm.tagsInput} onChange={e => setHotelForm({ ...hotelForm, tagsInput: e.target.value })} placeholder="Hồ bơi, Spa, View biển, Lễ tân 24/7" />
                         </div>
 
                         <div style={{ gridColumn: "span 2", display: "flex", gap: "10px", marginTop: "1rem" }}>
@@ -517,16 +517,16 @@ export default function AdminDashboardPage() {
                                   fontWeight: 600,
                                   background:
                                     b.status === "confirmed" ? "#e8f5e9" :
-                                    b.status === "completed" ? "#e3f2fd" :
-                                    b.status === "cancelled" ? "#ffebee" : "#fff8e1",
+                                      b.status === "completed" ? "#e3f2fd" :
+                                        b.status === "cancelled" ? "#ffebee" : "#fff8e1",
                                   color:
                                     b.status === "confirmed" ? "#2e7d32" :
-                                    b.status === "completed" ? "#1565c0" :
-                                    b.status === "cancelled" ? "#c62828" : "#f57f17"
+                                      b.status === "completed" ? "#1565c0" :
+                                        b.status === "cancelled" ? "#c62828" : "#f57f17"
                                 }}>
                                   {b.status === "pending" ? "Chờ duyệt" :
-                                   b.status === "confirmed" ? "Đã xác nhận" :
-                                   b.status === "completed" ? "Đã xong" : "Đã hủy"}
+                                    b.status === "confirmed" ? "Đã xác nhận" :
+                                      b.status === "completed" ? "Đã xong" : "Đã hủy"}
                                 </span>
                               </td>
                               <td style={{ padding: "12px", textAlign: "center" }}>

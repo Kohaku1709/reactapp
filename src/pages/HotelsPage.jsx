@@ -17,20 +17,21 @@ export default function HotelsPage() {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   // State quản lý bộ lọc và sắp xếp
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
-  
+
   // State lọc địa chỉ/tên khách sạn trực tiếp bằng ô input trên trang
   const [addressQuery, setAddressQuery] = useState(typeof initialSearch === "string" ? initialSearch.trim() : "");
-  
+
   // State phân trang: quản lý số lượng card khách sạn hiển thị tối đa
   const [visibleCount, setVisibleCount] = useState(12);
   const gridColumns = useResponsiveGridColumns(); // Hook tính số cột grid responsive
 
   const isWishlistEnabled = Boolean(currentUser);
   const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
+  // const bookedSet = useMemo(() => new Set(bookedHotelIds || []), [bookedHotelIds]); // Đã hoàn tác
 
   // Gọi API tải danh sách khách sạn dựa trên các tiêu chí lọc, sắp xếp, tìm kiếm đã chọn
   // (Nhờ Backend cập nhật, quá trình lọc và sắp xếp này diễn ra hoàn toàn chính xác ở DB)
@@ -73,6 +74,11 @@ export default function HotelsPage() {
     }
   }, [routeLocation.state]);
 
+  // Cuộn trang về đầu khi component HotelsPage được tải lần đầu (mỗi khi navigate đến trang này)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   // Cắt lát (Slice) mảng để phân trang hiển thị thực tế trên UI
   const visibleHotels = hotels.slice(0, visibleCount);
   const hasMore = visibleCount < hotels.length;
@@ -99,7 +105,7 @@ export default function HotelsPage() {
                   onClick={() => setActiveFilter(f)}>{f}</button>
               ))}
             </div>
-            
+
             {/* Tiêu chí sắp xếp */}
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
@@ -151,18 +157,19 @@ export default function HotelsPage() {
                   <HotelCard
                     key={hotel.id}
                     hotel={hotel}
+                    // isBooked={bookedSet.has(Number(hotel.id))} // Đã hoàn tác
                     interactiveWishlist={isWishlistEnabled}
                     isWishlisted={wishlistSet.has(hotel.id)}
                     onWishlistToggle={onToggleWishlist}
                   />
                 ))}
               </div>
-              
+
               {/* Nút Xem thêm */}
               {hasMore && (
                 <div className="load-more-wrap">
                   <button className="load-more-btn"
-                    onClick={() => setVisibleCount((p) => p + 12 * gridColumns)}>
+                    onClick={() => setVisibleCount((p) => p + 4 * gridColumns)}>
                     Xem thêm
                   </button>
                 </div>
