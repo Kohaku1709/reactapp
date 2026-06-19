@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import { bookingAPI } from "../services/api";
-
 // Cấu hình các nhãn hiển thị trạng thái đơn đặt phòng tương ứng với mã màu CSS
 const STATUS_LABEL = {
   pending: { text: "Chờ xác nhận", color: "#f59e0b" },
@@ -10,19 +9,34 @@ const STATUS_LABEL = {
   cancelled: { text: "Đã hủy", color: "#ef4444" },
   completed: { text: "Hoàn thành", color: "#6366f1" },
 };
-
 // Hàm định dạng hiển thị ngày tháng sang kiểu Việt Nam (DD/MM/YYYY)
 const fmt = (d) => new Date(d).toLocaleDateString("vi-VN");
 // Hàm định dạng hiển thị tiền tệ Việt Nam đồng
 const fmtPrice = (p) => Number(p).toLocaleString("vi-VN") + "₫";
-
+// Hàm phân tích cấu trúc ghi chú từ file .env/mã đặt phòng giả lập để tạo hóa đơn trực quan
+const parseNote = (note) => {
+  if (!note || !note.startsWith("[StayHTM-Invoice]")) {
+    return { isInvoice: false, userNote: note };
+  }
+  
+  const parts = note.split(" | ");
+  const data = { isInvoice: true };
+  parts.forEach(p => {
+    const idx = p.indexOf(":");
+    if (idx !== -1) {
+      const key = p.substring(0, idx).trim();
+      const val = p.substring(idx + 1).trim();
+      data[key] = val;
+    }
+  });
+  return data;
+};
 // Component Lịch sử Đặt phòng (Bookings Page)
 export default function BookingsPage() {
-  const { currentUser } = useUser(); // Đã hoàn tác việc lấy setBookedHotelIds từ Context
+  const { currentUser } = useUser();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null); // Lưu trữ ID đơn đang gửi yêu cầu hủy lên server
-
   // Lấy lịch sử đặt phòng của user từ API sau khi mount component
   useEffect(() => {
     if (!currentUser) return;
@@ -31,10 +45,8 @@ export default function BookingsPage() {
       .catch(() => { })
       .finally(() => setLoading(false));
   }, [currentUser]);
-
   // Điều hướng bảo vệ: Nếu chưa đăng nhập, tự động chuyển sang trang Login
   if (!currentUser) return <Navigate to="/login" replace />;
-
   // Xử lý gửi yêu cầu hủy đặt phòng lên backend
   const handleCancel = async (id) => {
     if (!window.confirm("Bạn có chắc muốn hủy đặt phòng này?")) return;
@@ -45,18 +57,11 @@ export default function BookingsPage() {
       setBookings((prev) =>
         prev.map((b) => b.id === id ? { ...b, status: "cancelled" } : b)
       );
-      // Cập nhật Global State: Xóa hotel_id của đơn đặt phòng vừa hủy // Đã hoàn tác
-      // const cancelledBookingID = bookings.find(b => b.id === id); // Đã hoàn tác
-      // if (cancelledBookingID && setBookedHotelIds) { // Đã hoàn tác
-      //   // Đảm bảo ID là kiểu Number để so khớp chính xác // Đã hoàn tác
-      //   setBookedHotelIds(prevIds => prevIds.filter(hotelId => hotelId !== Number(cancelledBooking.hotel_id))); // Đã hoàn tác
-      // }
     } else {
       alert(res.message || "Hủy thất bại.");
     }
     setCancelling(null);
   };
-
   return (
     <div className="app page-with-header-offset">
       {/* Banner trang trí */}
@@ -66,7 +71,6 @@ export default function BookingsPage() {
           <p className="page-hero-sub">Quản lý toàn bộ lịch sử đặt phòng của bạn</p>
         </div>
       </div>
-
       <section className="section section-white">
         <div className="section-inner">
           {loading ? (
@@ -87,6 +91,9 @@ export default function BookingsPage() {
                 const status = STATUS_LABEL[b.status] || { text: b.status, color: "#888" };
                 // Tính số đêm lưu trú từ ngày nhận và ngày trả phòng
                 const nights = Math.ceil((new Date(b.check_out) - new Date(b.check_in)) / 86400000);
+                
+                // Phân tích ghi chú
+                const invoice = parseNote(b.note);
                 return (
                   <div key={b.id} className="booking-card">
                     <img src={b.image_url} alt={b.hotel_name} className="booking-img" />
@@ -106,8 +113,31 @@ export default function BookingsPage() {
                       <p className="booking-meta">
                         👥 {b.guests} khách · 🛏 {b.rooms} phòng
                       </p>
-                      <div className="booking-footer">
-                        <span className="booking-total">{fmtPrice(b.total_price)}</span>
+                      
+                      {/* Hiển thị bảng chi tiết hóa đơn (Nếu được đặt qua giao diện mới) */}
+                      {invoice.isInvoice ? (
+                        <div className="booking-note-details">
+                          <div className="booking-note-title">📋 Chi tiết dịch vụ đã đặt:</div>
+                          <div className="booking-note-grid">
+                            <div className="booking-note-item">Hạng phòng: <strong>{invoice.RoomType}</strong></div>
+                            <div className="booking-note-item">Dịch vụ phụ: <strong>{invoice.Addons}</strong></div>
+                            <div className="booking-note-item">Mã ưu đãi: <strong>{invoice.Promo}</strong></div>
+                            <div className="booking-note-item">Giảm giá phòng: <strong style={{ color: "#10b981" }}>-{Number(invoice.DiscountAmt).toLocaleString("vi-VN")}₫</strong></div>
+                            <div className="booking-note-item">Thuế & Phí (15%): <strong>+{Number(invoice.TaxAmt).toLocaleString("vi-VN")}₫</strong></div>
+                            <div className="booking-note-item">Thanh toán: <strong>{invoice.PayMethod}</strong></div>
+                            {invoice.UserNote !== "Không" && (
+                              <div className="booking-note-item" style={{ gridColumn: "span 2" }}>Ghi chú riêng: <strong>{invoice.UserNote}</strong></div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        b.note && <p className="booking-note">📝 Ghi chú: {b.note}</p>
+                      )}
+                      <div className="booking-footer" style={{ marginTop: "1rem" }}>
+                        <div>
+                          <span style={{ fontSize: "12px", color: "var(--muted)", display: "block" }}>Tổng số tiền:</span>
+                          <span className="booking-total">{fmtPrice(b.total_price)}</span>
+                        </div>
                         {/* Chỉ hiển thị nút Hủy đơn nếu trạng thái là pending (chờ xác nhận) hoặc confirmed (đã xác nhận) */}
                         {(b.status === "pending" || b.status === "confirmed") && (
                           <button
@@ -119,8 +149,6 @@ export default function BookingsPage() {
                           </button>
                         )}
                       </div>
-                      {/* Hiển thị ghi chú của người dùng nếu có */}
-                      {b.note && <p className="booking-note">📝 {b.note}</p>}
                     </div>
                   </div>
                 );
