@@ -123,6 +123,139 @@
 .search-field-body {
     width: 100%;
 }
+/* =========================================
+   POP-OVER CHỌN KHÁCH & PHÒNG
+   ========================================= */
+
+/* Bao bọc ô tìm kiếm */
+.guests-field-wrap {
+    position: relative;
+}
+
+.guests-trigger {
+    cursor: pointer;
+    user-select: none; /* Tránh bôi đen chữ khi click đúp */
+}
+
+/* Lớp phủ mờ giúp click ra ngoài tự đóng popover */
+.popover-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9;
+}
+
+/* Hộp Popover chính */
+.guests-popover {
+    position: absolute;
+    top: calc(100% + 12px); /* Tự động cách nút trigger 12px */
+    left: 0;
+    z-index: 10;
+    background: #ffffff;
+    padding: 20px; /* Thêm không gian thở */
+    border-radius: 12px; /* Bo góc mềm mại hơn */
+    border: 1px solid #ebebeb; /* Viền mỏng bao quanh */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); /* Bóng đổ to, mờ, sang trọng */
+    width: 280px; 
+    
+    /* Hiệu ứng trượt nhẹ từ dưới lên khi mở */
+    animation: popoverFadeIn 0.2s ease-out;
+}
+
+/* Animation mở Popover */
+@keyframes popoverFadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dòng chọn số lượng */
+.popover-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Cụm chữ bên trái (Tiêu đề + Mô tả) */
+.popover-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.popover-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #222222;
+}
+
+.popover-desc {
+    font-size: 13px;
+    color: #717171; /* Màu xám nhạt cho chữ phụ */
+}
+
+/* Ô nhập số */
+.counter-input {
+    width: 56px; /* Rộng hơn một chút để dễ thao tác */
+    height: 36px;
+    text-align: center;
+    font-weight: 600; /* Làm số đậm hơn để dễ nhìn */
+    font-size: 16px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    background: #ffffff;
+    outline: none;
+    color: #222222;
+    transition: all 0.2s ease;
+    
+    /* Ẩn mũi tên mặc định */
+    appearance: textfield;
+    -moz-appearance: textfield; 
+}
+
+/* Hiệu ứng di chuột vào ô nhập */
+.counter-input:hover {
+    border-color: #bbbbbb;
+}
+
+/* Hiệu ứng khi người dùng đang nhập liệu */
+.counter-input:focus {
+    border-color: var(--brand, #0056ff);
+    box-shadow: 0 0 0 3px rgba(0, 86, 255, 0.15); /* Quầng sáng viền */
+}
+
+/* Ẩn mũi tên trên Chrome, Safari, Edge */
+.counter-input::-webkit-outer-spin-button,
+.counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Nút Hoàn tất */
+.popover-close-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--brand, #0056ff);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover Nút Hoàn tất */
+.popover-close-btn:hover {
+    filter: brightness(0.9); /* Làm màu nền tối đi một chút */
+}
+
+/* Bấm Nút Hoàn tất */
+.popover-close-btn:active {
+    transform: scale(0.98); /* Nhún nhẹ khi click */
+}
 
 .destination-field {
     flex: 1.25;

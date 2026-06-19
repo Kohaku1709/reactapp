@@ -24,9 +24,8 @@ export default function HomePage() {
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
 
-    // Các state mới quản lý việc chọn số lượng khách và số phòng
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
+  // Các state quản lý việc chọn số lượng khách và số phòng
+  const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState(1);
   const [showGuestsPopover, setShowGuestsPopover] = useState(false);
 
@@ -65,19 +64,35 @@ export default function HomePage() {
   // Xử lý gửi Form tìm kiếm, chuyển hướng sang trang /hotels kèm state địa chỉ tìm kiếm
   const handleSearch = (event) => {
     event?.preventDefault();
-    navigate("/hotels", { 
-      state: { 
+    navigate("/hotels", {
+      state: {
         searchAddress: destination.trim(),
         checkin: checkin ? checkin.toISOString() : null,
         checkout: checkout ? checkout.toISOString() : null,
-        adults,
-        children,
+        guests, // Đã sửa từ adults, children thành guests
         rooms
-      } 
+      }
     });
   };
 
+  // Xử lý khi thay đổi Số khách
+  const handleGuestsChange = (value) => {
+    if (value > 99 * 4) return; // Giới hạn tối đa 999 khách để tránh lỗi hiển thị
 
+    const newGuests = Math.max(0, parseInt(value, 10) || 0);
+    setGuests(newGuests);
+    // Đảm bảo số phòng tối thiểu luôn là 1 (kể cả khi số khách là 0)
+    const minRooms = Math.max(1, Math.ceil(newGuests / 4));
+    setRooms(prevRooms => prevRooms < minRooms ? minRooms : prevRooms);
+  };
+
+  // Xử lý khi thay đổi Số phòng
+  const handleRoomsChange = (value) => {
+    // Đảm bảo số phòng tối thiểu luôn là 1 dựa trên số khách hiện tại
+    const minRooms = Math.max(1, Math.ceil(guests / 4));
+    const newRooms = Math.max(minRooms, parseInt(value, 10) || minRooms);
+    setRooms(newRooms);
+  };
 
   // Xử lý khi click vào Card điểm đến, chuyển hướng nhanh sang trang tìm kiếm theo điểm đến đó
   const handleDestinationClick = (name) => {
@@ -94,8 +109,6 @@ export default function HomePage() {
     filterOptions: HOTEL_FILTER_DEFAULTS,
     extraFilter: undefined,
   });
-
-
 
   return (
     <div className="app">
@@ -148,29 +161,55 @@ export default function HomePage() {
                   dateFormat="dd/MM/yyyy" placeholderText="Chọn ngày" minDate={checkin || new Date()} />
               </div>
             </div>
+            <div className="search-divider" />
 
-                        {/* Trường chọn số lượng khách và số phòng (Dropdown Popover nâng cấp) */}
+            {/* Trường chọn số Khách & Phòng */}
             <div className="search-field guests-field-wrap">
               <span className="field-icon">👥</span>
               <div className="guests-trigger" onClick={() => setShowGuestsPopover(!showGuestsPopover)}>
                 <label>Khách & Phòng</label>
-                <span>{rooms} phòng, {adults + children} khách</span>
+                <span>{rooms} phòng, {guests} khách {showGuestsPopover ? '▲' : '▼'}</span>
               </div>
 
               {showGuestsPopover && (
-                <div className="guests-popover" onClick={(e) => e.stopPropagation()}>
-                  {/* Dòng chọn số phòng */}
-                  <div className="popover-row">
-                    <span className="popover-label-title">Số phòng</span>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <button type="button" className="counter-btn" disabled={rooms <= 1} onClick={() => setRooms(rooms - 1)}>-</button>
-                      <span className="counter-value">{rooms}</span>
-                      <button type="button" className="counter-btn" disabled={rooms >= 8} onClick={() => setRooms(rooms + 1)}>+</button>
+                <>
+                  <div className="popover-overlay" onClick={() => setShowGuestsPopover(false)} />
+
+                  <div className="guests-popover">
+                    {/* Chọn số Khách */}
+                    <div className="popover-row">
+                      <div className="popover-info">
+                        <span className="popover-title">Số khách</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="counter-input"
+                        value={guests}
+                        onChange={(e) => handleGuestsChange(e.target.value)}
+                        min="1"
+                      />
                     </div>
+
+                    {/* Chọn số Phòng */}
+                    <div className="popover-row">
+                      <div className="popover-info">
+                        <span className="popover-title">Số phòng</span>
+                        <span className="popover-desc">Tối đa 4 khách/phòng</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="counter-input"
+                        value={rooms}
+                        onChange={(e) => handleRoomsChange(e.target.value)}
+                        min={Math.ceil(guests / 4)}
+                      />
+                    </div>
+
+                    <button type="button" className="popover-close-btn" onClick={() => setShowGuestsPopover(false)}>
+                      Hoàn tất
+                    </button>
                   </div>
-                  {/* Tương tự cho Người lớn và Trẻ em... */}
-                  <button type="button" className="popover-close-btn" onClick={() => setShowGuestsPopover(false)}>Áp dụng</button>
-                </div>
+                </>
               )}
             </div>
 
@@ -240,7 +279,6 @@ export default function HomePage() {
               <div className="hotels-grid">
                 {visibleHotels.map((hotel) => (
                   <HotelCard key={hotel.id} hotel={hotel}
-                    // isBooked={bookedSet.has(Number(hotel.id))} // Đã hoàn tác
                     interactiveWishlist={isWishlistEnabled}
                     isWishlisted={wishlistSet.has(hotel.id)}
                     onWishlistToggle={onToggleWishlist}
@@ -248,8 +286,7 @@ export default function HomePage() {
                 ))}
               </div>
 
-              {/* Nút xem thêm khách sạn: Thay vì tải thêm tại chỗ (vì trang chủ chỉ giới hạn 8 khách sạn nổi bật),
-                  nút này sẽ chuyển hướng (redirect) người dùng sang trang danh sách toàn bộ khách sạn (/hotels) */}
+              {/* Nút xem thêm khách sạn */}
               <div className="load-more-wrap">
                 <button className="load-more-btn" onClick={() => navigate("/hotels")}>
                   Xem thêm

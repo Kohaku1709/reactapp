@@ -10,13 +10,13 @@
     padding: 0;
 }
 
- :root {
-     --brand: #0057ff;
-     --brand-dark: #003fcc;
-     --brand-light: #e8f0ff;
-+    --primary: var(--brand);
-     --gold: #f5a623;
-     --dark: #0a0f1e;
+:root {
+    --brand: #0057ff;
+    --brand-dark: #003fcc;
+    --brand-light: #e8f0ff;
+    --primary: #0057ff;
+    --gold: #f5a623;
+    --dark: #0a0f1e;
     --text: #1a2340;
     --muted: #6b7a99;
     --border: #e4e9f2;
