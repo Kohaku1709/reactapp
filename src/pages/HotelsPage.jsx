@@ -51,6 +51,11 @@ export default function HotelsPage() {
   // Kích hoạt gọi API mỗi khi các tham số lọc hoặc sắp xếp thay đổi
   useEffect(() => { fetchHotels(); }, [fetchHotels]);
 
+  // Tự động cuộn lên đầu trang khi trang được load/mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Reset số lượng khách sạn hiển thị về 12 mỗi khi người dùng đổi bộ lọc
   useEffect(() => {
     Promise.resolve().then(() => {

@@ -68,7 +68,7 @@ export default function HomePage() {
   };
 
   // Pipeline xử lý bộ lọc cho danh sách khách sạn nổi bật ở trang chủ (chạy local trên client)
-  const { filteredHotels, visibleHotels, hasMoreHotels } = useHotelListing({
+  const { filteredHotels, visibleHotels } = useHotelListing({
     hotelList: hotels,
     activeFilter,
     sortBy,
@@ -205,14 +205,13 @@ export default function HomePage() {
                 ))}
               </div>
               
-              {/* Nút xem thêm khách sạn */}
-              {hasMoreHotels && (
-                <div className="load-more-wrap">
-                  <button className="load-more-btn" onClick={() => setVisibleRows((p) => p + 4)}>
-                    Xem thêm
-                  </button>
-                </div>
-              )}
+              {/* Nút xem thêm khách sạn: Thay vì tải thêm tại chỗ (vì trang chủ chỉ giới hạn 8 khách sạn nổi bật),
+                  nút này sẽ chuyển hướng (redirect) người dùng sang trang danh sách toàn bộ khách sạn (/hotels) */}
+              <div className="load-more-wrap">
+                <button className="load-more-btn" onClick={() => navigate("/hotels")}>
+                  Xem thêm
+                </button>
+              </div>
             </>
           )}
         </div>
