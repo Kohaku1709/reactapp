@@ -257,6 +257,34 @@
     transform: scale(0.98); /* Nhún nhẹ khi click */
 }
 
+/* BookingModal */
+.promo-apply-btn{
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+/* BookingModal too */
+.promo-input{
+    width: 60%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-right: 8px;
+}
+
 .destination-field {
     flex: 1.25;
 }

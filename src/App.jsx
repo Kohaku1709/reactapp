@@ -100,8 +100,8 @@ export default function App() {
       currentUser={currentUser}
       wishlistHotelIds={wishlistHotelIds}
       wishlistHotels={wishlistHotels}
-      bookedHotelIds={bookedHotelIds} // Giữ lại việc truyền state này nếu bạn vẫn muốn dùng nó cho các mục đích khác
-      setBookedHotelIds={setBookedHotelIds} // Giữ lại việc truyền hàm này nếu bạn vẫn muốn dùng nó cho các mục đích khác
+      bookedHotelIds={bookedHotelIds}
+      setBookedHotelIds={setBookedHotelIds}
       onLogin={handleLogin}
       onLogout={handleLogout}
       onToggleWishlist={handleToggleWishlist}

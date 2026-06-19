@@ -287,7 +287,7 @@ export default function BookingModal({ hotel, onClose }) {
                     <input
                       className="promo-input"
                       type="text"
-                      placeholder="Nhập mã (Ví dụ: STAYHTM40, WELCOME10)"
+                      placeholder="Nhập mã (Ví dụ: STAYHTM)"
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value)}
                     />
@@ -585,4 +585,3 @@ export default function BookingModal({ hotel, onClose }) {
   );
 }
 
-}
