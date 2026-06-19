@@ -24,6 +24,12 @@ export default function HomePage() {
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
 
+    // Các state mới quản lý việc chọn số lượng khách và số phòng
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [rooms, setRooms] = useState(1);
+  const [showGuestsPopover, setShowGuestsPopover] = useState(false);
+
   // State quản lý bộ lọc hoạt động và kiểu sắp xếp của danh sách khách sạn hiển thị ở trang chủ
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
@@ -59,7 +65,16 @@ export default function HomePage() {
   // Xử lý gửi Form tìm kiếm, chuyển hướng sang trang /hotels kèm state địa chỉ tìm kiếm
   const handleSearch = (event) => {
     event?.preventDefault();
-    navigate("/hotels", { state: { searchAddress: destination.trim() } });
+    navigate("/hotels", { 
+      state: { 
+        searchAddress: destination.trim(),
+        checkin: checkin ? checkin.toISOString() : null,
+        checkout: checkout ? checkout.toISOString() : null,
+        adults,
+        children,
+        rooms
+      } 
+    });
   };
 
 
@@ -132,6 +147,31 @@ export default function HomePage() {
                 <DatePicker selected={checkout} onChange={setCheckout}
                   dateFormat="dd/MM/yyyy" placeholderText="Chọn ngày" minDate={checkin || new Date()} />
               </div>
+            </div>
+
+                        {/* Trường chọn số lượng khách và số phòng (Dropdown Popover nâng cấp) */}
+            <div className="search-field guests-field-wrap">
+              <span className="field-icon">👥</span>
+              <div className="guests-trigger" onClick={() => setShowGuestsPopover(!showGuestsPopover)}>
+                <label>Khách & Phòng</label>
+                <span>{rooms} phòng, {adults + children} khách</span>
+              </div>
+
+              {showGuestsPopover && (
+                <div className="guests-popover" onClick={(e) => e.stopPropagation()}>
+                  {/* Dòng chọn số phòng */}
+                  <div className="popover-row">
+                    <span className="popover-label-title">Số phòng</span>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <button type="button" className="counter-btn" disabled={rooms <= 1} onClick={() => setRooms(rooms - 1)}>-</button>
+                      <span className="counter-value">{rooms}</span>
+                      <button type="button" className="counter-btn" disabled={rooms >= 8} onClick={() => setRooms(rooms + 1)}>+</button>
+                    </div>
+                  </div>
+                  {/* Tương tự cho Người lớn và Trẻ em... */}
+                  <button type="button" className="popover-close-btn" onClick={() => setShowGuestsPopover(false)}>Áp dụng</button>
+                </div>
+              )}
             </div>
 
             {/* Nút gửi tìm kiếm */}
