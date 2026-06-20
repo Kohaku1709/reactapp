@@ -1,9 +1,3 @@
-verview
-
-
-
-
-
 import { useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -122,6 +116,9 @@ export default function BookingModal({ hotel, onClose }) {
     } else if (code === "WELCOME10") {
       setAppliedPromo({ code: "WELCOME10", rate: 0.1 });
       setPromoMsg({ text: "Áp dụng thành công! Giảm 10% tiền phòng.", type: "success" });
+    } else if (code === "STAYHTM") {
+      setAppliedPromo({ code: "STAYHTM", rate: 0.2 });
+      setPromoMsg({ text: "Áp dụng thành công! Giảm 20% tiền phòng.", type: "success" });
     } else {
       setPromoMsg({ text: "Mã giảm giá không tồn tại hoặc đã hết hạn.", type: "error" });
       setAppliedPromo(null);
@@ -392,36 +389,36 @@ export default function BookingModal({ hotel, onClose }) {
                   <div className="invoice-title">🧾 Chi tiết hóa đơn thanh toán</div>
                   
                   <div className="invoice-item">
-                    <span>Hạng phòng: {selectedRoom.name}</span>
+                    <span>Hạng phòng: <strong>{selectedRoom.name}</strong></span>
                     <span>{(basePrice * selectedRoom.factor).toLocaleString("vi-VN")}₫ × {nights} đêm × {rooms} phòng</span>
                   </div>
                   
-                  <div className="invoice-item" style={{ paddingLeft: "10px", fontSize: "11.5px" }}>
-                    <span>Tổng tiền phòng gốc</span>
+                  <div className="invoice-item" style={{ paddingLeft: "12px", fontSize: "12px", color: "var(--muted)" }}>
+                    <span>Tổng tiền phòng gốc:</span>
                     <span>{billDetails.totalRoomPrice.toLocaleString("vi-VN")}₫</span>
                   </div>
                   {/* Dịch vụ đi kèm */}
                   {selectedAddons.length > 0 && (
                     <>
-                      <div className="invoice-item" style={{ fontWeight: 600, color: "var(--dark)", marginTop: "4px" }}>
+                      <div className="invoice-item" style={{ fontWeight: 600, color: "var(--dark)", marginTop: "6px" }}>
                         <span>Dịch vụ đi kèm đã chọn:</span>
                         <span>+{billDetails.totalAddonsPrice.toLocaleString("vi-VN")}₫</span>
                       </div>
                       {selectedAddons.includes("breakfast") && (
-                        <div className="invoice-item" style={{ paddingLeft: "10px", fontSize: "11.5px" }}>
-                          <span>- Buffet sáng ({guests} khách × {nights} đêm)</span>
+                        <div className="invoice-item" style={{ paddingLeft: "12px", fontSize: "12px", color: "var(--muted)" }}>
+                          <span>- Buffet sáng ({guests} khách × {nights} đêm):</span>
                           <span>{billDetails.breakfastPrice.toLocaleString("vi-VN")}₫</span>
                         </div>
                       )}
                       {selectedAddons.includes("pickup") && (
-                        <div className="invoice-item" style={{ paddingLeft: "10px", fontSize: "11.5px" }}>
-                          <span>- Xe đón tiễn sân bay (Khứ hồi)</span>
+                        <div className="invoice-item" style={{ paddingLeft: "12px", fontSize: "12px", color: "var(--muted)" }}>
+                          <span>- Xe đón tiễn sân bay (Khứ hồi):</span>
                           <span>{billDetails.pickupPrice.toLocaleString("vi-VN")}₫</span>
                         </div>
                       )}
                       {selectedAddons.includes("spa") && (
-                        <div className="invoice-item" style={{ paddingLeft: "10px", fontSize: "11.5px" }}>
-                          <span>- Gói trị liệu Spa ({guests} khách)</span>
+                        <div className="invoice-item" style={{ paddingLeft: "12px", fontSize: "12px", color: "var(--muted)" }}>
+                          <span>- Gói trị liệu Spa ({guests} khách):</span>
                           <span>{billDetails.spaPrice.toLocaleString("vi-VN")}₫</span>
                         </div>
                       )}
@@ -430,17 +427,17 @@ export default function BookingModal({ hotel, onClose }) {
                   {/* Giảm giá ưu đãi */}
                   {appliedPromo && (
                     <div className="invoice-item discount-item">
-                      <span>Mã ưu đãi đã dùng ({appliedPromo.code} giảm {(appliedPromo.rate * 100)}% tiền phòng)</span>
-                      <span>-{billDetails.discountAmount.toLocaleString("vi-VN")}₫</span>
+                      <span>Mã ưu đãi đã dùng ({appliedPromo.code} giảm {appliedPromo.rate * 100}% tiền phòng):</span>
+                      <span style={{ color: "#10b981", fontWeight: 600 }}>-{billDetails.discountAmount.toLocaleString("vi-VN")}₫</span>
                     </div>
                   )}
                   <div className="invoice-divider"></div>
                   <div className="invoice-item">
-                    <span>Tạm tính (Sau chiết khấu & phụ phí)</span>
+                    <span>Tạm tính (Sau chiết khấu & phụ phí):</span>
                     <span>{billDetails.subtotal.toLocaleString("vi-VN")}₫</span>
                   </div>
                   <div className="invoice-item">
-                    <span>Thuế VAT (10%)</span>
+                    <span>Thuế VAT (10%):</span>
                     <span>{billDetails.vatAmount.toLocaleString("vi-VN")}₫</span>
                   </div>
                   <div className="invoice-item">

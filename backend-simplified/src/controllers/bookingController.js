@@ -34,7 +34,7 @@ const createBooking = async (req, res) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
 
-  const { hotel_id, check_in, check_out, guests = 1, rooms = 1, note } = req.body;
+  const { hotel_id, check_in, check_out, guests = 1, rooms = 1, total_price, note } = req.body;
 
   try {
     // 1. Kiểm tra sự tồn tại và tính hoạt động của khách sạn cần đặt
@@ -58,8 +58,9 @@ const createBooking = async (req, res) => {
     // 2. Tính số đêm thuê thực tế
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
     
-    // 3. Tính tổng số tiền đặt phòng = giá một phòng/đêm * số đêm * số phòng đặt
-    const totalPrice = hotel.price * nights * rooms;
+    // 3. Tính tổng số tiền đặt phòng
+    // Ưu tiên sử dụng tổng giá tiền (bao gồm cả hạng phòng, dịch vụ đi kèm và giảm giá) được tính toán chính xác từ Frontend gửi lên
+    const totalPrice = total_price && !isNaN(total_price) ? Number(total_price) : (hotel.price * nights * rooms);
 
     // 4. Chèn thông tin đơn đặt phòng mới vào database. Vì người dùng đã thực hiện thanh toán thành công
     // ở giao diện Frontend, trạng thái ban đầu của hóa đơn sẽ tự động được gán là 'confirmed' (đã xác nhận)
