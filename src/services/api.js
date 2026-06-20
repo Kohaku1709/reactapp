@@ -1,5 +1,5 @@
 // URL gốc của backend API
-const BASE = "http://localhost:3001/api";
+const BASE = "https://stayhtm-backend.onrender.com";
 
 // Các hàm tương tác với LocalStorage để lưu và quản lý JWT Token đăng nhập
 export const getToken = () => localStorage.getItem("stayhtm_token");
