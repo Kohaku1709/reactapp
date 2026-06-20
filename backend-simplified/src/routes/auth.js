@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const { register, login, getMe, updateMe } = require("../controllers/authController");
+const { register, login, getMe, updateMe, googleLogin, forgotPassword, resetPassword } = require("../controllers/authController");
 const { authMiddleware } = require("../middlewares/auth");
 
 const router = express.Router();
@@ -25,10 +25,19 @@ router.post("/register", registerRules, register);
 // 2. Đăng nhập hệ thống (POST /api/auth/login)
 router.post("/login",    loginRules,    login);
 
-// 3. Lấy thông tin cá nhân hiện tại (GET /api/auth/me) - Yêu cầu token hợp lệ thông qua authMiddleware
+// 3. Đăng nhập bằng tài khoản Google (POST /api/auth/google)
+router.post("/google", googleLogin);
+
+// 4. Quên mật khẩu - gửi mã xác nhận (POST /api/auth/forgot-password)
+router.post("/forgot-password", forgotPassword);
+
+// 5. Đặt lại mật khẩu mới qua mã xác nhận (POST /api/auth/reset-password)
+router.post("/reset-password", resetPassword);
+
+// 6. Lấy thông tin cá nhân hiện tại (GET /api/auth/me) - Yêu cầu token hợp lệ thông qua authMiddleware
 router.get("/me",        authMiddleware, getMe);
 
-// 4. Cập nhật thông tin cá nhân (PUT /api/auth/me) - Yêu cầu token hợp lệ
+// 7. Cập nhật thông tin cá nhân (PUT /api/auth/me) - Yêu cầu token hợp lệ
 router.put("/me",        authMiddleware, updateMe);
 
 module.exports = router;

@@ -20,11 +20,14 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE IF NOT EXISTS users (
   id          SERIAL PRIMARY KEY,
   email       VARCHAR(255) NOT NULL UNIQUE,       -- Email đăng nhập (duy nhất)
-  password    VARCHAR(255) NOT NULL,              -- Mật khẩu đã được mã hóa bcrypt
+  password    VARCHAR(255),                       -- Mật khẩu (null nếu chỉ đăng nhập bằng Google)
   name        VARCHAR(100) NOT NULL,              -- Tên hiển thị người dùng
   avatar_url  TEXT,                               -- Đường dẫn ảnh đại diện
   role        VARCHAR(20) NOT NULL DEFAULT 'user',-- Vai trò (user, admin)
   is_active   BOOLEAN NOT NULL DEFAULT TRUE,      -- Trạng thái tài khoản (True: đang hoạt động)
+  google_id   VARCHAR(255) UNIQUE,                -- ID tài khoản Google
+  reset_otp   VARCHAR(6),                         -- Mã xác nhận đặt lại mật khẩu
+  reset_otp_expires_at TIMESTAMPTZ,                -- Hạn dùng của mã xác nhận
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

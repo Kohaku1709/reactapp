@@ -37,6 +37,27 @@ export const authAPI = {
       body: JSON.stringify({ email, password, name }),
     }),
 
+  // Đăng nhập bằng Google OAuth
+  googleLogin: (credential) =>
+    apiFetch("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    }),
+
+  // Yêu cầu mã xác nhận đặt lại mật khẩu gửi về email
+  forgotPassword: (email) =>
+    apiFetch("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  // Đặt lại mật khẩu bằng mã xác nhận
+  resetPassword: (email, otp, newPassword) =>
+    apiFetch("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ email, otp, newPassword }),
+    }),
+
   // Lấy thông tin cá nhân của user đang đăng nhập (dùng token)
   getMe: () => apiFetch("/auth/me"),
 
