@@ -10,7 +10,6 @@ import { HOTEL_FILTERS, HOTEL_SORT_DEFAULT, HOTEL_SORT_OPTIONS } from "../utils/
 export default function HotelsPage() {
   const { currentUser, wishlistHotelIds, onToggleWishlist } = useUser();
   const routeLocation = useLocation();
-  // Đọc từ khóa tìm kiếm được truyền từ Trang chủ nếu có
   const initialSearch = routeLocation.state?.searchAddress || "";
 
   // State quản lý danh sách khách sạn và trạng thái gọi API
@@ -21,25 +20,25 @@ export default function HotelsPage() {
   // State quản lý bộ lọc và sắp xếp
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
-
-  // State lọc địa chỉ/tên khách sạn trực tiếp bằng ô input trên trang
   const [addressQuery, setAddressQuery] = useState(typeof initialSearch === "string" ? initialSearch.trim() : "");
 
-  // State phân trang: quản lý số lượng card khách sạn hiển thị tối đa
-  const [visibleCount, setVisibleCount] = useState(12);
-  const gridColumns = useResponsiveGridColumns(); // Hook tính số cột grid responsive
+  // ===== THAY ĐỔI: State quản lý Phân trang =====
+  const ITEMS_PER_PAGE = 15;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const gridColumns = useResponsiveGridColumns(); 
 
   const isWishlistEnabled = Boolean(currentUser);
   const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
-  // const bookedSet = useMemo(() => new Set(bookedHotelIds || []), [bookedHotelIds]); // Đã hoàn tác
 
-  // Gọi API tải danh sách khách sạn dựa trên các tiêu chí lọc, sắp xếp, tìm kiếm đã chọn
-  // (Nhờ Backend cập nhật, quá trình lọc và sắp xếp này diễn ra hoàn toàn chính xác ở DB)
+  // Gọi API
   const fetchHotels = useCallback(() => {
     Promise.resolve().then(() => {
       setLoading(true);
       setError("");
     });
+    // Lưu ý: limit đang là 100, nghĩa là tối đa bạn có khoảng 7 trang (100/15). 
+    // Nếu dữ liệu DB lớn hơn, bạn nhờ Backend bỏ limit đi hoặc tăng số này lên nhé.
     hotelAPI.getAll({ filter: activeFilter, sort: sortBy, search: addressQuery, limit: 100 })
       .then((res) => {
         if (res.success) setHotels(res.data);
@@ -49,22 +48,15 @@ export default function HotelsPage() {
       .finally(() => setLoading(false));
   }, [activeFilter, sortBy, addressQuery]);
 
-  // Kích hoạt gọi API mỗi khi các tham số lọc hoặc sắp xếp thay đổi
   useEffect(() => { fetchHotels(); }, [fetchHotels]);
 
-  // Tự động cuộn lên đầu trang khi trang được load/mount
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // Reset số lượng khách sạn hiển thị về 12 mỗi khi người dùng đổi bộ lọc
+  // Reset về Trang 1 mỗi khi người dùng thay đổi bộ lọc hoặc tìm kiếm
   useEffect(() => {
     Promise.resolve().then(() => {
-      setVisibleCount(12);
+      setCurrentPage(1);
     });
   }, [activeFilter, sortBy, addressQuery]);
 
-  // Đồng bộ lại ô tìm kiếm địa chỉ khi người dùng navigate từ Trang chủ qua (sử dụng State điều hướng)
   useEffect(() => {
     const s = routeLocation.state?.searchAddress;
     if (typeof s === "string") {
@@ -74,18 +66,23 @@ export default function HotelsPage() {
     }
   }, [routeLocation.state]);
 
-  // Cuộn trang về đầu khi component HotelsPage được tải lần đầu (mỗi khi navigate đến trang này)
+  // Cuộn lên đầu trang mỗi khi chuyển trang hoặc load lần đầu
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [currentPage]);
 
-  // Cắt lát (Slice) mảng để phân trang hiển thị thực tế trên UI
-  const visibleHotels = hotels.slice(0, visibleCount);
-  const hasMore = visibleCount < hotels.length;
+  // ===== THAY ĐỔI: Logic cắt mảng để hiển thị theo Trang hiện tại =====
+  const totalPages = Math.ceil(hotels.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const visibleHotels = hotels.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Các hàm điều hướng trang
+  const goToFirstPage = () => setCurrentPage(1);
+  const goToPrevPage = () => setCurrentPage((prev) => Math.max(1, prev - 1));
+  const goToNextPage = () => setCurrentPage((prev) => Math.min(totalPages, prev + 1));
 
   return (
     <div className="app page-with-header-offset">
-      {/* Khối Banner trang trí đầu trang */}
       <div className="page-hero">
         <div className="page-hero-inner">
           <h1 className="page-hero-title">Tất cả khách sạn</h1>
@@ -95,9 +92,7 @@ export default function HotelsPage() {
 
       <section className="section hotels-section">
         <div className="section-inner">
-          {/* Thanh Toolbar lọc & sắp xếp */}
           <div className="hotels-toolbar">
-            {/* Bộ lọc nhanh */}
             <div className="filter-bar">
               {HOTEL_FILTERS.map((f) => (
                 <button key={f}
@@ -106,7 +101,6 @@ export default function HotelsPage() {
               ))}
             </div>
 
-            {/* Tiêu chí sắp xếp */}
             <div className="sort-wrap">
               <label className="sort-label">Sắp xếp:</label>
               <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -117,7 +111,6 @@ export default function HotelsPage() {
             </div>
           </div>
 
-          {/* Ô nhập lọc nhanh theo địa chỉ/tên khách sạn */}
           <div className="address-filter-wrap">
             <span className="address-filter-icon">📍</span>
             <input
@@ -126,7 +119,6 @@ export default function HotelsPage() {
               onChange={(e) => setAddressQuery(e.target.value)}
               placeholder="Lọc nhanh theo địa chỉ..."
             />
-            {/* Hiển thị nút Xóa nhanh từ khóa khi có chữ */}
             {addressQuery && (
               <button className="address-clear-btn" type="button" onClick={() => setAddressQuery("")}>
                 Xóa
@@ -134,14 +126,12 @@ export default function HotelsPage() {
             )}
           </div>
 
-          {/* Dòng tóm tắt kết quả tìm kiếm */}
           <div className="section-header hotels-result-header">
             <span className="result-count">
               {loading ? "Đang tải..." : `${hotels.length} khách sạn được tìm thấy`}
             </span>
           </div>
 
-          {/* Hiển thị lỗi nếu có */}
           {error && <p style={{ color: "red", textAlign: "center", padding: "1rem" }}>{error}</p>}
 
           {loading ? (
@@ -151,13 +141,11 @@ export default function HotelsPage() {
             </div>
           ) : (
             <>
-              {/* Lưới hiển thị danh sách thẻ khách sạn */}
               <div className="hotels-grid">
                 {visibleHotels.map((hotel) => (
                   <HotelCard
                     key={hotel.id}
                     hotel={hotel}
-                    // isBooked={bookedSet.has(Number(hotel.id))} // Đã hoàn tác
                     interactiveWishlist={isWishlistEnabled}
                     isWishlisted={wishlistSet.has(hotel.id)}
                     onWishlistToggle={onToggleWishlist}
@@ -165,12 +153,37 @@ export default function HotelsPage() {
                 ))}
               </div>
 
-              {/* Nút Xem thêm */}
-              {hasMore && (
-                <div className="load-more-wrap">
-                  <button className="load-more-btn"
-                    onClick={() => setVisibleCount((p) => p + 4 * gridColumns)}>
-                    Xem thêm
+              {/* ===== THAY ĐỔI: Thanh điều hướng phân trang (Pagination) ===== */}
+              {totalPages > 1 && (
+                <div className="pagination-wrap" style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "30px", marginBottom: "20px" }}>
+                  <button 
+                    className="load-more-btn" 
+                    onClick={goToFirstPage} 
+                    disabled={currentPage === 1}
+                    style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
+                  >
+                    Trang đầu
+                  </button>
+                  <button 
+                    className="load-more-btn" 
+                    onClick={goToPrevPage} 
+                    disabled={currentPage === 1}
+                    style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
+                  >
+                    Trang trước
+                  </button>
+                  
+                  <span style={{ display: "flex", alignItems: "center", padding: "0 15px", fontWeight: "bold" }}>
+                    Trang {currentPage} / {totalPages}
+                  </span>
+                  
+                  <button 
+                    className="load-more-btn" 
+                    onClick={goToNextPage} 
+                    disabled={currentPage === totalPages}
+                    style={{ opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
+                  >
+                    Trang sau
                   </button>
                 </div>
               )}
