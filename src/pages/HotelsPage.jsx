@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import useResponsiveGridColumns from "../hooks/useResponsiveGridColumns";
 import HotelCard from "../components/HotelCard";
 import { useUser } from "../context/userContext";
 import { hotelAPI } from "../services/api";
@@ -26,7 +25,6 @@ export default function HotelsPage() {
   const ITEMS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const gridColumns = useResponsiveGridColumns(); 
 
   const isWishlistEnabled = Boolean(currentUser);
   const wishlistSet = useMemo(() => new Set(wishlistHotelIds), [wishlistHotelIds]);
