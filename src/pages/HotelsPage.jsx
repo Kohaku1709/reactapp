@@ -22,7 +22,7 @@ export default function HotelsPage() {
   const [sortBy, setSortBy] = useState(HOTEL_SORT_DEFAULT);
   const [addressQuery, setAddressQuery] = useState(typeof initialSearch === "string" ? initialSearch.trim() : "");
 
-  // ===== THAY ĐỔI: State quản lý Phân trang =====
+  // State quản lý Phân trang
   const ITEMS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -37,8 +37,7 @@ export default function HotelsPage() {
       setLoading(true);
       setError("");
     });
-    // Lưu ý: limit đang là 100, nghĩa là tối đa bạn có khoảng 7 trang (100/15). 
-    // Nếu dữ liệu DB lớn hơn, bạn nhờ Backend bỏ limit đi hoặc tăng số này lên nhé.
+    
     hotelAPI.getAll({ filter: activeFilter, sort: sortBy, search: addressQuery, limit: 100 })
       .then((res) => {
         if (res.success) setHotels(res.data);
@@ -71,7 +70,7 @@ export default function HotelsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
-  // ===== THAY ĐỔI: Logic cắt mảng để hiển thị theo Trang hiện tại =====
+  // Logic cắt mảng để hiển thị theo Trang hiện tại
   const totalPages = Math.ceil(hotels.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const visibleHotels = hotels.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -153,14 +152,13 @@ export default function HotelsPage() {
                 ))}
               </div>
 
-              {/* ===== THAY ĐỔI: Thanh điều hướng phân trang (Pagination) ===== */}
+              {/* Thanh điều hướng phân trang (Đã tách CSS) */}
               {totalPages > 1 && (
-                <div className="pagination-wrap" style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "30px", marginBottom: "20px" }}>
+                <div className="pagination-wrap">
                   <button 
                     className="load-more-btn" 
                     onClick={goToFirstPage} 
                     disabled={currentPage === 1}
-                    style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
                   >
                     Trang đầu
                   </button>
@@ -168,12 +166,11 @@ export default function HotelsPage() {
                     className="load-more-btn" 
                     onClick={goToPrevPage} 
                     disabled={currentPage === 1}
-                    style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? "not-allowed" : "pointer" }}
                   >
                     Trang trước
                   </button>
                   
-                  <span style={{ display: "flex", alignItems: "center", padding: "0 15px", fontWeight: "bold" }}>
+                  <span className="pagination-info">
                     Trang {currentPage} / {totalPages}
                   </span>
                   
@@ -181,7 +178,6 @@ export default function HotelsPage() {
                     className="load-more-btn" 
                     onClick={goToNextPage} 
                     disabled={currentPage === totalPages}
-                    style={{ opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}
                   >
                     Trang sau
                   </button>
