@@ -25,7 +25,7 @@ export default function HomePage() {
   const [checkout, setCheckout] = useState(null);
 
   // Các state quản lý việc chọn số lượng khách và số phòng
-  const [guests, setGuests] = useState(2);
+  const [guests, setGuests] = useState(1);
   const [rooms, setRooms] = useState(1);
   const [showGuestsPopover, setShowGuestsPopover] = useState(false);
 
@@ -186,7 +186,7 @@ export default function HomePage() {
                         className="counter-input"
                         value={guests}
                         onChange={(e) => handleGuestsChange(e.target.value)}
-                        min="1"
+                        min="0"
                       />
                     </div>
 
