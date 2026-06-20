@@ -9,6 +9,9 @@ RUN npm install
 # Copy toan bo ma nguon backend
 COPY . .
 
+# Convert line endings sang LF neu file duoc luu tren Windows (tranh loi \r)
+RUN sed -i 's/\r$//' start.sh
+
 # Set quyen thuc thi cho file start.sh
 RUN chmod +x start.sh
 
