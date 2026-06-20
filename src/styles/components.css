@@ -713,6 +713,32 @@ body::-webkit-scrollbar-thumb:hover {
     color: var(--muted);
 }
 
+/* =========================================
+   PHÂN TRANG (PAGINATION)
+========================================= */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+/* Kiểu dáng cho thẻ span hiển thị số trang */
+.pagination-info {
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  font-weight: bold;
+}
+
+/* Xử lý giao diện khi nút bị vô hiệu hóa (disabled) */
+.pagination-wrap .load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* Ngăn chặn cả các sự kiện hover/click nếu có */
+}
+
 /* Forms */
 .contact-form {
     background: white;
