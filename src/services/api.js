@@ -1,5 +1,5 @@
 // URL gốc của backend API
-const BASE = "http://localhost:3001";
+const BASE = "http://localhost:3001/api";
 
 // Các hàm tương tác với LocalStorage để lưu và quản lý JWT Token đăng nhập
 export const getToken = () => localStorage.getItem("stayhtm_token");
